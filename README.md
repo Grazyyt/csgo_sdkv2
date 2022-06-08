@@ -1,38 +1,11 @@
-# 💤 csgo_sdk 💤
+# csgo_sdkv2
 
-![GitHub issues](https://img.shields.io/github/issues/xsslize/csgo_sdk)
-![GitHub closed issues](https://img.shields.io/github/issues-closed/xsslize/csgo_sdk)
-![GitHub all releases](https://img.shields.io/github/downloads/xsslize/csgo_sdk/total)
+original: https://github.com/xsslize/csgo_sdk
 
 Modified CSGOSimple repository
 
 What has been updated:
-- All offsets
-- Fixed chams on arms/sleeves/weapons
-- Improved / changed menu
-- Made rebuilding project files in a more convenient form
-- Fixed recent update issue with fps degradation
-- Fixed problem with new Valve protection
-
-Update 1.0:
-- Fixed box stroke
-- Fixed weapon names
-
-Update 1.1:
-- Add prediction
-- Add auto strafe
-- Add grenade prediction
-- Add direct_x render
-- Fixed small bugs
-
-Update 2.0
-- Add new configuration system
-- Add legit aimbot
-- Add legit backtrack
-- Add legit autowall
-- New design of config tab
-- Add some visuals for legit and other
-- Some code improvements and fixes
+- Updated to latest csgo version
 
 Menu:
 ![Screenshot_2](https://user-images.githubusercontent.com/37377502/155980867-c1023e69-144e-4e0a-a370-5ca54c2c05a4.png)
