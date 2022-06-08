@@ -6,6 +6,8 @@ Modified CSGOSimple repository
 
 What has been updated:
 - Updated to latest csgo version
+- Added Nightmode because im tired of seeing trash csgosimple nightmode
+- Added No Fog because why not
 
 Menu:
 ![Screenshot_2](https://user-images.githubusercontent.com/37377502/155980867-c1023e69-144e-4e0a-a370-5ca54c2c05a4.png)
