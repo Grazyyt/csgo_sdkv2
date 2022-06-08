@@ -416,6 +416,66 @@ void Visuals::DrawFOV()
 	}
 }
 
+void Visuals::Nightmode() {
+
+	if (!g_EngineClient->IsInGame() && !g_EngineClient->IsConnected())
+		return;
+
+	static ConVar* ThreeD = g_CVar->FindVar("r_3dsky");
+	static ConVar* r_DrawSpecificStaticProp = g_CVar->FindVar("r_DrawSpecificStaticProp");
+	r_DrawSpecificStaticProp->SetValue(1);
+	ThreeD->SetValue(0);
+	auto world_color = g_Configurations.nightmode_color_world;
+	auto prop_color = g_Configurations.nightmode_color_prop;
+	auto sky_color = g_Configurations.nightmode_color_sky;
+	bool enabled = g_Configurations.misc_nightmode;
+
+	for (MaterialHandle_t i = g_MatSystem->FirstMaterial(); i != g_MatSystem->InvalidMaterial(); i = g_MatSystem->NextMaterial(i))
+	{
+		IMaterial* pMaterial = g_MatSystem->GetMaterial(i);
+
+		if (!pMaterial)
+			continue;
+
+		if (!pMaterial->IsPrecached())
+			continue;
+
+		if (strstr(pMaterial->GetTextureGroupName(), "World") && enabled)
+		{
+			pMaterial->ColorModulate(world_color[0], world_color[1], world_color[2]);
+			pMaterial->AlphaModulate(world_color[3]);
+		}
+		else if (strstr(pMaterial->GetTextureGroupName(), "World") && !enabled || g_Unload)
+		{
+			pMaterial->ColorModulate(1.f, 1.f, 1.f);
+			pMaterial->AlphaModulate(1.f);
+		}
+
+
+		if (strstr(pMaterial->GetTextureGroupName(), "StaticProp") && enabled)
+		{
+			pMaterial->ColorModulate(prop_color[0], prop_color[1], prop_color[2]);
+			pMaterial->AlphaModulate(prop_color[3]);
+		}
+		else if (strstr(pMaterial->GetTextureGroupName(), "StaticProp") && !enabled || g_Unload)
+		{
+			pMaterial->ColorModulate(1.f, 1.f, 1.f);
+			pMaterial->AlphaModulate(1.f);
+		}
+
+		if (strstr(pMaterial->GetTextureGroupName(), "SkyBox") && enabled)
+		{
+			pMaterial->ColorModulate(sky_color[0], sky_color[1], sky_color[2]);
+			pMaterial->AlphaModulate(sky_color[3]);
+		}
+		else if (strstr(pMaterial->GetTextureGroupName(), "SkyBox") && !enabled || g_Unload)
+		{
+			pMaterial->ColorModulate(1.f, 1.f, 1.f);
+			pMaterial->AlphaModulate(1.f);
+		}
+	}
+}
+
 void Visuals::AddToDrawList() 
 {
 	if (g_Configurations.esp_grenade_prediction)

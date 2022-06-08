@@ -148,11 +148,18 @@ public:
 		CONFIGURATION(float, misc_mat_ambient_light_g, 0.0f);
 		CONFIGURATION(float, misc_mat_ambient_light_b, 0.0f);
 
+		CONFIGURATION(bool, misc_nightmode, false);
+		CONFIGURATION(bool, misc_no_fog, false);
+
 		// 
 		// COLORS
 		//
 
 		//Changed to float, because it's more comfortable for me :)
+		float nightmode_color_world[4] = { 0.15f, 0.15f, 0.15f, 1.0f };
+		float nightmode_color_prop[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
+		float nightmode_color_sky[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 		float color_esp_ally_visible[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float color_esp_enemy_visible[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		float color_esp_ally_occluded[4] = { 1.0f, 1.0f, 1.0f, 1.0f };

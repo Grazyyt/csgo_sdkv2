@@ -43,6 +43,7 @@ public:
 	void RenderItemEsp(C_BaseEntity* ent);
 	void ThirdPerson();
 	void DrawFOV();
+	void Nightmode();
 public:
 	void AddToDrawList();
 	void Render();

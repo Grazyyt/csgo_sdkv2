@@ -51,6 +51,7 @@ namespace Hooks
 		clientmode_hook.hook_index(index::DoPostScreenSpaceEffects, hkDoPostScreenEffects);
 		clientmode_hook.hook_index(index::OverrideView, hkOverrideView);
 		sv_cheats.hook_index(index::SvCheatsGetBool, hkSvCheatsGetBool);
+		clientmode_hook.hook_index(index::ShouldDrawFog, hkShouldDrawFog);
 
 		anti_cheat_fix();
 	}
@@ -259,10 +260,13 @@ namespace Hooks
 		return oDoPostScreenEffects(g_ClientMode, edx, a1);
 	}
 
-	void __fastcall hkFrameStageNotify(void* _this, int edx, ClientFrameStage_t stage)
+	void __stdcall hkFrameStageNotify(ClientFrameStage_t stage)
 	{
-		static auto ofunc = hlclient_hook.get_original<decltype(&hkFrameStageNotify)>(index::FrameStageNotify);
-		ofunc(g_CHLClient, edx, stage);
+		static auto ofunc = hlclient_hook.get_original<void(__thiscall*)(IBaseClientDLL*, ClientFrameStage_t)>(index::FrameStageNotify);
+
+		Visuals::Get().Nightmode();
+
+		return ofunc(g_CHLClient, stage);
 	}
 
 	void __fastcall hkOverrideView(void* _this, int edx, CViewSetup* vsView)
@@ -315,5 +319,8 @@ namespace Hooks
 		if (reinterpret_cast<DWORD>(_ReturnAddress()) == reinterpret_cast<DWORD>(dwCAM_Think))
 			return true;
 		return ofunc(pConVar);
+	}
+	bool __fastcall hkShouldDrawFog(void* ecx, void* edx) {
+		return !g_Configurations.misc_no_fog;
 	}
 }

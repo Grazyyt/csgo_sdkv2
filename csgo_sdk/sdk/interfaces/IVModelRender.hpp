@@ -190,6 +190,7 @@ public:
     virtual void                    RefreshPreservingMaterialVars() = 0;
     virtual bool                    WasReloadedFromWhitelist() = 0;
     virtual bool                    SetTempExcluded(bool bSet, int nExcludedDimensionLimit) = 0;
+    virtual bool			        IsPrecached() const = 0;
     virtual int                     GetReferenceCount() const = 0;
 };
 

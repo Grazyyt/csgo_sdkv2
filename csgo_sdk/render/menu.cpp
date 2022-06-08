@@ -441,6 +441,11 @@ void RenderMiscTab()
         ImGui::Checkbox("No hands", &g_Configurations.misc_no_hands);
 		ImGui::Checkbox("Rank reveal", &g_Configurations.misc_showranks);
 		ImGui::Checkbox("Watermark", &g_Configurations.misc_watermark);
+		ImGui::Checkbox("No Fog", &g_Configurations.misc_no_fog);
+        ImGui::Checkbox("Nightmode", &g_Configurations.misc_nightmode);
+        ImGui::ColorEdit3("Color World", g_Configurations.nightmode_color_world);
+        ImGui::ColorEdit3("Color Prop", g_Configurations.nightmode_color_prop);
+        ImGui::ColorEdit3("Color Sky", g_Configurations.nightmode_color_sky);
 
 		ImGui::NextColumn();
 
