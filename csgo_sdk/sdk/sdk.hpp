@@ -86,6 +86,7 @@ inline CClientState*         g_ClientState    = nullptr;
 inline IPhysicsSurfaceProps* g_PhysSurface    = nullptr;
 inline IInputSystem*         g_InputSystem    = nullptr;
 inline IWeaponSystem*        g_WeaponSystem   = nullptr;
+inline INetMessage*          g_NetMessage    = nullptr;
 
 template<typename... Args>
 void ConMsg(const char* pMsg, Args... args)

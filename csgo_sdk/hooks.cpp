@@ -39,6 +39,7 @@ namespace Hooks
 		clientmode_hook.setup(g_ClientMode);
 		ConVar* sv_cheats_con = g_CVar->FindVar("sv_cheats");
 		sv_cheats.setup(sv_cheats_con);
+		gameevents_vhook.setup(g_GameEvents);
 
 		direct3d_hook.hook_index(index::EndScene, hkEndScene);
 		direct3d_hook.hook_index(index::Reset, hkReset);
@@ -52,6 +53,7 @@ namespace Hooks
 		clientmode_hook.hook_index(index::OverrideView, hkOverrideView);
 		sv_cheats.hook_index(index::SvCheatsGetBool, hkSvCheatsGetBool);
 		clientmode_hook.hook_index(index::ShouldDrawFog, hkShouldDrawFog);
+		gameevents_vhook.hook_index(index::FireEvent, hkFireEvent);
 
 		anti_cheat_fix();
 	}
@@ -322,5 +324,46 @@ namespace Hooks
 	}
 	bool __fastcall hkShouldDrawFog(void* ecx, void* edx) {
 		return !g_Configurations.misc_no_fog;
+	}
+	bool __fastcall hkSendNetMsg(void* ecx, void* edx, INetMessage* msg, bool reliable, bool voice)
+	{
+		static auto oSNMEvent = netchannel_vhook.get_original<sendnetmsg_fn>(index::SendNetMessage);
+
+		if (!msg)
+			return original_sendnetmsg(ecx, msg, reliable, voice);
+
+
+		if (msg->GetType() == 14)
+			return false;
+
+		if (msg->GetGroup() == 9) // Fix lag when transmitting voice and fakelagging
+			voice = true;
+
+		return oSNMEvent(ecx, msg, reliable, voice);
+	}
+	bool __stdcall hkFireEvent(IGameEvent* pEvent)
+	{
+		static auto oFireEvent = gameevents_vhook.get_original<bool(__thiscall*)(IGameEventManager2*, IGameEvent* pEvent)>(index::FireEvent);
+		const char* szEventName = pEvent->GetName();
+
+		if (!strcmp(szEventName, "server_spawn"))
+		{
+			const auto net_channel = g_EngineClient->GetNetChannelInfo();
+			netchannel_vhook.setup(net_channel);
+			if (net_channel != nullptr)
+			{
+				netchannel_vhook.hook_index(40, hkSendNetMsg);
+			}
+		}
+
+		if (!strcmp(szEventName, "cs_game_disconnected") || g_Unload)
+		{
+			if (netchannel_vhook.is_hooked())
+			{
+				netchannel_vhook.unhook_all();
+			}
+		}
+
+		return oFireEvent(g_GameEvents, pEvent);
 	}
 }

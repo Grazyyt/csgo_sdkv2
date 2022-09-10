@@ -108,20 +108,11 @@ void Chams::OnDrawModelExecute(IMatRenderContext* ctx, const DrawModelState_t& s
 				(Color)g_Configurations.color_chams_sleeve_visible);
 		}
 	}
-	else if (is_arm && g_Configurations.chams_arms_enabled)
+	else if (is_arm && g_Configurations.chams_arms_enabled && !g_Configurations.misc_no_hands)
 	{
 		auto material = g_MatSystem->FindMaterial(mdl->szName, TEXTURE_GROUP_MODEL);
 		if (!material)
 			return;
-
-		if (g_Configurations.misc_no_hands)
-		{
-			// 
-			// No hands.
-			// 
-			material->SetMaterialVarFlag(MATERIAL_VAR_NO_DRAW, true);
-			g_MdlRender->ForcedMaterialOverride(material);
-		}
 
 		if (g_Configurations.chams_arms_ignorez)
 		{
@@ -134,6 +125,17 @@ void Chams::OnDrawModelExecute(IMatRenderContext* ctx, const DrawModelState_t& s
 			OverrideMaterial(false, g_Configurations.chams_arms_flat, g_Configurations.chams_arms_wireframe, g_Configurations.chams_arms_glass,
 				(Color)g_Configurations.color_chams_arms_visible);
 		}
+	}
+	else if (is_arm && g_Configurations.misc_no_hands)
+	{
+		auto material = g_MatSystem->FindMaterial(mdl->szName, TEXTURE_GROUP_MODEL);
+		if (!material)
+			return;
+		// 
+		// No hands.
+		// 
+		material->SetMaterialVarFlag(MATERIAL_VAR_NO_DRAW, true);
+		g_MdlRender->ForcedMaterialOverride(material);
 	}
 	else if (is_weapon && g_Configurations.chams_weapon_enabled && !is_arm)
 	{

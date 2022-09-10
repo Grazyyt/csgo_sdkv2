@@ -66,6 +66,7 @@ public:
 	{
 		return (T)old_vftbl[index];
 	}
+	bool is_hooked() { return m_bHooked; }
 
 private:
 	static inline std::size_t estimate_vftbl_length(std::uintptr_t* vftbl_start);
@@ -74,4 +75,5 @@ private:
 	std::size_t     vftbl_len;
 	std::uintptr_t* new_vftbl;
 	std::uintptr_t* old_vftbl;
+	bool			m_bHooked;
 };

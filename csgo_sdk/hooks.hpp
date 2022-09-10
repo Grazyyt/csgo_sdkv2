@@ -21,6 +21,8 @@ namespace index
 	constexpr auto OverrideView             = 18;
 	constexpr auto LockCursor               = 67;
 	constexpr auto ShouldDrawFog			= 17;
+	constexpr auto FireEvent				= 9;
+	constexpr auto SendNetMessage			= 40;
 }
 
 namespace Hooks
@@ -37,8 +39,12 @@ namespace Hooks
 	inline vfunc_hook sound_hook;
 	inline vfunc_hook clientmode_hook;
 	inline vfunc_hook sv_cheats;
+	inline vfunc_hook gameevents_vhook;
+	inline vfunc_hook netchannel_vhook;
 
 
+	typedef bool(__thiscall* sendnetmsg_fn)(void*, INetMessage* msg, bool reliable, bool voice);
+	inline sendnetmsg_fn original_sendnetmsg = nullptr;
     long __stdcall hkEndScene(IDirect3DDevice9* device);
     long __stdcall hkReset(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters);
     void __stdcall hkCreateMove(int sequence_number, float input_sample_frametime, bool active, bool& bSendPacket);
@@ -52,4 +58,6 @@ namespace Hooks
     int  __fastcall hkDoPostScreenEffects(void* _this, int, int a1);
 	bool __fastcall hkSvCheatsGetBool(PVOID pConVar, void* edx);
 	bool __fastcall hkShouldDrawFog(void* ecx, void* edx);
+	bool __fastcall hkSendNetMsg(void* ecx, void* edx, INetMessage* msg, bool reliable, bool voice);
+	bool __stdcall hkFireEvent(IGameEvent* pEvent);
 }
