@@ -242,3 +242,16 @@ const char* const KeyNames[] =
     "VK_LMENU",
     "VK_RMENU"
 };
+
+const char* const knifemodels[] =
+{
+    "Default",
+    "M9 Bayonet",
+};
+
+const char* const weaponesptype[] =
+{
+    "None",
+    "Name",
+    "Icon",
+};

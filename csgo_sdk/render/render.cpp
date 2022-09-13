@@ -15,6 +15,7 @@
 
 ImFont* g_pDefaultFont;
 ImFont* g_pSecondFont;
+ImFont* g_IconEsp;
 
 ImDrawListSharedData _data;
 
@@ -43,7 +44,15 @@ void Render::GetFonts()
 	g_pDefaultFont = ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF(Fonts::Droid_compressed_data, Fonts::Droid_compressed_size, 18.f);
 	
 	// font for watermark; just example
-	g_pSecondFont = ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF( Fonts::Cousine_compressed_data, Fonts::Cousine_compressed_size, 18.f); 
+	g_pSecondFont = ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF( Fonts::Cousine_compressed_data, Fonts::Cousine_compressed_size, 18.f);
+
+	// Weapon Icons font
+	g_IconEsp = ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF(
+		Fonts::undefeated_compressed_data,
+		Fonts::undefeated_compressed_size,
+		16.f,
+		nullptr,
+		ImGui::GetIO().Fonts->GetGlyphRangesCyrillic());
 }
 
 void Render::ClearDrawList() 

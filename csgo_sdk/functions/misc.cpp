@@ -1,7 +1,11 @@
 #include "misc.hpp"
-
 #include "../configurations.hpp"
 #include "../sdk/utils/math.hpp"
+#include "../sdk/utils/input.hpp"
+
+#include <algorithm>
+#include <Windows.h>
+#include <d3dx9math.h>
 
 void Misc::AutoStrafe(CUserCmd* cmd)
 {
@@ -127,4 +131,142 @@ void Misc::AutoStrafe(CUserCmd* cmd)
 		cmd->forwardmove = cos(yaw) * speed;
 
 	cmd->sidemove = sin(yaw) * speed;
+}
+
+void Misc::Bhop(CUserCmd* cmd)
+{
+	static bool jumped_last_tick = false;
+	static bool should_fake_jump = false;
+
+	if (!bhop2)
+		return;
+
+	if (!g_LocalPlayer)
+		return;
+
+	if (!g_LocalPlayer->IsAlive())
+		return;
+
+	if (g_LocalPlayer->m_nMoveType() == MOVETYPE_LADDER || g_LocalPlayer->m_nMoveType() == MOVETYPE_NOCLIP)
+		return;
+
+	if (g_LocalPlayer->m_fFlags() & FL_INWATER)
+		return;
+
+	if (!jumped_last_tick && should_fake_jump)
+	{
+		should_fake_jump = false;
+		cmd->buttons |= IN_JUMP;
+	}
+	else if (cmd->buttons & IN_JUMP)
+	{
+		if (g_LocalPlayer->m_fFlags() & FL_ONGROUND)
+		{
+			jumped_last_tick = true;
+			should_fake_jump = true;
+		}
+		else
+		{
+			cmd->buttons &= ~IN_JUMP;
+			jumped_last_tick = false;
+		}
+	}
+	else
+	{
+		jumped_last_tick = false;
+		should_fake_jump = false;
+	}
+}
+
+void Misc::JumpBug(CUserCmd* cmd)
+{
+	float max_radias = D3DX_PI * 2;
+	float step = max_radias / 128;
+	float xThick = 23;
+	if (g_Configurations.misc_jumpbug&& InputSys::Get().IsKeyDown(g_Configurations.misc_jumpbugkey)) {
+		if (g_LocalPlayer->m_fFlags() & FL_ONGROUND) {
+			bhop2 = false;
+			bool unduck = cmd->buttons &= ~IN_DUCK;
+			if (unduck) {
+				cmd->buttons &= ~IN_DUCK; // duck
+				cmd->buttons |= IN_JUMP; // jump
+				unduck = false;
+			}
+			Vector pos = g_LocalPlayer->GetAbsOrigin();
+			for (float a = 0.f; a < max_radias; a += step) {
+				Vector pt;
+				pt.x = (xThick * cos(a)) + pos.x;
+				pt.y = (xThick * sin(a)) + pos.y;
+				pt.z = pos.z;
+
+
+				Vector pt2 = pt;
+				pt2.z -= 8192;
+
+				trace_t fag;
+
+				Ray_t ray;
+				ray.Init(pt, pt2);
+
+				CTraceFilter flt;
+				flt.pSkip = g_LocalPlayer;
+				g_EngineTrace->TraceRay(ray, MASK_PLAYERSOLID, &flt, &fag);
+
+				if (fag.fraction != 1.f && fag.fraction != 0.f) {
+					cmd->buttons |= IN_DUCK; // duck
+					cmd->buttons &= ~IN_JUMP; // jump
+					unduck = true;
+				}
+			}
+			for (float a = 0.f; a < max_radias; a += step) {
+				Vector pt;
+				pt.x = ((xThick - 2.f) * cos(a)) + pos.x;
+				pt.y = ((xThick - 2.f) * sin(a)) + pos.y;
+				pt.z = pos.z;
+
+				Vector pt2 = pt;
+				pt2.z -= 8192;
+
+				trace_t fag;
+
+				Ray_t ray;
+				ray.Init(pt, pt2);
+
+				CTraceFilter flt;
+				flt.pSkip = g_LocalPlayer;
+				g_EngineTrace->TraceRay(ray, MASK_PLAYERSOLID, &flt, &fag);
+
+				if (fag.fraction != 1.f && fag.fraction != 0.f) {
+					cmd->buttons |= IN_DUCK; // duck
+					cmd->buttons &= ~IN_JUMP; // jump
+					unduck = true;
+				}
+			}
+			for (float a = 0.f; a < max_radias; a += step) {
+				Vector pt;
+				pt.x = ((xThick - 20.f) * cos(a)) + pos.x;
+				pt.y = ((xThick - 20.f) * sin(a)) + pos.y;
+				pt.z = pos.z;
+
+				Vector pt2 = pt;
+				pt2.z -= 8192;
+
+				trace_t fag;
+
+				Ray_t ray;
+				ray.Init(pt, pt2);
+
+				CTraceFilter flt;
+				flt.pSkip = g_LocalPlayer;
+				g_EngineTrace->TraceRay(ray, MASK_PLAYERSOLID, &flt, &fag);
+
+				if (fag.fraction != 1.f && fag.fraction != 0.f) {
+					cmd->buttons |= IN_DUCK; // duck
+					cmd->buttons &= ~IN_JUMP; // jump
+					unduck = true;
+				}
+			}
+		}
+	}
+	else bhop2 = true;
 }

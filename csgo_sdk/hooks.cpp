@@ -6,7 +6,6 @@
 #include "configurations.hpp"
 #include "sdk/utils/input.hpp"
 #include "sdk/utils/utils.hpp"
-#include "functions/bhop.hpp"
 #include "functions/chams.hpp"
 #include "functions/visuals.hpp"
 #include "functions/glow.hpp"
@@ -154,6 +153,7 @@ namespace Hooks
 
 		auto cmd = g_Input->GetUserCmd(sequence_number);
 		auto verified = g_Input->GetVerifiedCmd(sequence_number);
+		auto flags = g_LocalPlayer->m_fFlags();
 
 		if (!cmd || !cmd->command_number)
 			return;
@@ -162,7 +162,7 @@ namespace Hooks
 			cmd->buttons &= ~IN_ATTACK;
 
 		if (g_Configurations.misc_bhop)
-			BunnyHop::OnCreateMove(cmd);
+			Misc::Get().Bhop(cmd);
 
 		if (g_Configurations.misc_autostrafe)
 			Misc::Get().AutoStrafe(cmd);
@@ -172,6 +172,7 @@ namespace Hooks
 
 		Engine_Prediction::Get().Begin(cmd);
 		{
+			Misc::Get().JumpBug(cmd);
 			LegitBot::Get().OnMove(cmd);
 			Backtrack::Get().OnMove(cmd);
 
@@ -179,6 +180,12 @@ namespace Hooks
 				Grenade_Pred::Get().Trace(cmd);
 		}
 		Engine_Prediction::Get().End();
+
+		if (g_Configurations.misc_edgejump && InputSys::Get().IsKeyDown(g_Configurations.misc_edgejumpkey))
+		{
+			if (!(g_LocalPlayer->m_fFlags() & FL_ONGROUND) && (flags & FL_ONGROUND))
+				cmd->buttons |= IN_JUMP;
+		}
 
 		verified->m_cmd = *cmd;
 		verified->m_crc = cmd->GetChecksum();

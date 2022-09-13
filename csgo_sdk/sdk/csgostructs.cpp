@@ -25,7 +25,7 @@ bool C_BaseEntity::IsLoot()
 
 bool C_BaseEntity::IsWeapon()
 {
-	return CallVFunction<bool(__thiscall*)(C_BaseEntity*)>(this, 165 + VALVE_ADDED_FUNCS)(this);
+	return CallVFunction<bool(__thiscall*)(C_BaseEntity*)>(this, 166 + VALVE_ADDED_FUNCS)(this);
 }
 
 bool C_BaseEntity::IsPlantedC4()
@@ -139,6 +139,14 @@ bool C_BaseCombatWeapon::IsReloading()
 	return *(bool*)((uintptr_t)this + inReload);
 }
 
+int C_BaseCombatWeapon::GetItemDefinitionIndex()
+{
+	if (!this)
+		return 0;
+
+	return this->m_Item().m_iItemDefinitionIndex();
+}
+
 float C_BaseCombatWeapon::GetInaccuracy()
 {
 	return CallVFunction<float(__thiscall*)(void*)>(this, 483 + VALVE_ADDED_FUNCS)(this);
@@ -176,7 +184,7 @@ std::string C_BaseCombatWeapon::get_name()
 		return "Knife";
 	case WEAPON_KNIFE_T:
 		return "Knife";
-	case WEAPON_BAYONET:
+	case WEAPON_KNIFE_BAYONET:
 		return "Bayonet";
 	case WEAPON_KNIFE_SURVIVAL_BOWIE:
 		return "Survival Bowie";
@@ -292,6 +300,11 @@ CUserCmd*& C_BasePlayer::m_pCurrentCommand()
 int C_BasePlayer::GetNumAnimOverlays()
 {
 	return *(int*)((DWORD)this + 0x298C);
+}
+
+Vector& C_BasePlayer::GetAbsOrigin()
+{
+	return CallVFunction<Vector& (__thiscall*)(void*)>(this, 10)(this);
 }
 
 AnimationLayer *C_BasePlayer::GetAnimOverlays()

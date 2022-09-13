@@ -20,6 +20,7 @@
 
 extern ImFont* g_pDefaultFont;
 extern ImFont* g_pSecondFont;
+extern ImFont* g_IconEsp;
 
 class Vector;
 

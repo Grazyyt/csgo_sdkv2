@@ -196,6 +196,7 @@ public:
 	CUtlVector<IRefCounted*>& m_CustomMaterials();
 	bool* m_bCustomMaterialInitialized();
 	std::string get_name();
+	int GetItemDefinitionIndex();
 };
 
 class C_BasePlayer : public C_BaseEntity
@@ -264,6 +265,7 @@ public:
 	/*gladiator v2*/
 	void InvalidateBoneCache();
 	int GetNumAnimOverlays();
+	Vector& GetAbsOrigin();
 	AnimationLayer *GetAnimOverlays();
 	AnimationLayer *GetAnimOverlay(int i);
 	int GetSequenceActivity(int sequence);

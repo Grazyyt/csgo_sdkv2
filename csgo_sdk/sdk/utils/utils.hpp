@@ -31,4 +31,5 @@ namespace Utils
 
     void SetClantag(const char* tag);
     void SetName(const char* name);
+    void modern_clamp_world(float& target, float to, float step);
 }

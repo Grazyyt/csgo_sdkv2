@@ -69,6 +69,76 @@ RECT GetBBox(C_BaseEntity* ent)
 	return RECT{ (long)left, (long)top, (long)right, (long)bottom };
 }
 
+std::map< int, std::string > m_weapon_icons =
+{
+		{ ItemDefinitionIndex::WEAPON_DEAGLE, "A" },
+		{ ItemDefinitionIndex::WEAPON_ELITE, "B" },
+		{ ItemDefinitionIndex::WEAPON_FIVESEVEN, "C" },
+		{ ItemDefinitionIndex::WEAPON_GLOCK, "D" },
+		{ ItemDefinitionIndex::WEAPON_AK47, "W" },
+		{ ItemDefinitionIndex::WEAPON_AUG, "U" },
+		{ ItemDefinitionIndex::WEAPON_AWP, "Z" },
+		{ ItemDefinitionIndex::WEAPON_FAMAS, "R" },
+		{ ItemDefinitionIndex::WEAPON_G3SG1, "X" },
+		{ ItemDefinitionIndex::WEAPON_GALILAR, "Q" },
+		{ ItemDefinitionIndex::WEAPON_M249, "g" },
+		{ ItemDefinitionIndex::WEAPON_M4A1, "S" },
+		{ ItemDefinitionIndex::WEAPON_MAC10, "K" },
+		{ ItemDefinitionIndex::WEAPON_P90, "P" },
+		{ ItemDefinitionIndex::WEAPON_MP5, "N" },
+		{ ItemDefinitionIndex::WEAPON_UMP45, "L" },
+		{ ItemDefinitionIndex::WEAPON_XM1014, "b" },
+		{ ItemDefinitionIndex::WEAPON_BIZON, "M" },
+		{ ItemDefinitionIndex::WEAPON_MAG7, "d" },
+		{ ItemDefinitionIndex::WEAPON_NEGEV, "f" },
+		{ ItemDefinitionIndex::WEAPON_SAWEDOFF, "c" },
+		{ ItemDefinitionIndex::WEAPON_TEC9, "H" },
+		{ ItemDefinitionIndex::WEAPON_TASER, "h" },
+		{ ItemDefinitionIndex::WEAPON_HKP2000, "E" },
+		{ ItemDefinitionIndex::WEAPON_MP7, "E" },
+		{ ItemDefinitionIndex::WEAPON_MP9, "O" },
+		{ ItemDefinitionIndex::WEAPON_NOVA, "e" },
+		{ ItemDefinitionIndex::WEAPON_P250, "F" },
+		{ ItemDefinitionIndex::WEAPON_SCAR20, "Y" },
+		{ ItemDefinitionIndex::WEAPON_SG556, "V" },
+		{ ItemDefinitionIndex::WEAPON_SSG08, "a" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE, "]" },
+		{ ItemDefinitionIndex::WEAPON_FLASHBANG, "i" },
+		{ ItemDefinitionIndex::WEAPON_HEGRENADE, "j" },
+		{ ItemDefinitionIndex::WEAPON_SMOKEGRENADE, "k" },
+		{ ItemDefinitionIndex::WEAPON_MOLOTOV, "l" },
+		{ ItemDefinitionIndex::WEAPON_DECOY, "m" },
+		{ ItemDefinitionIndex::WEAPON_INCGRENADE, "n" },
+		{ ItemDefinitionIndex::WEAPON_C4, "o" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_T, "[" },
+		{ ItemDefinitionIndex::WEAPON_M4A1_SILENCER, "T" },
+		{ ItemDefinitionIndex::WEAPON_USP_SILENCER, "G" },
+		{ ItemDefinitionIndex::WEAPON_CZ75A, "I" },
+		{ ItemDefinitionIndex::WEAPON_REVOLVER, "J" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_BAYONET, "1" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_FLIP, "2" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_GUT, "3" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_KARAMBIT, "4" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_M9_BAYONET, "5" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_TACTICAL, "6" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_FALCHION, "0" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_SURVIVAL_BOWIE, "7" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_BUTTERFLY, "8" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_PUSH, "9" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_CORD, "[" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_CANIS, "[" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_URSUS, "[" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_GYPSY_JACKKNIFE, "[" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_OUTDOOR, "[" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_STILETTO, "[" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_WIDOWMAKER, "[" },
+		{ ItemDefinitionIndex::WEAPON_KNIFE_SKELETON, "[" },
+		{ ItemDefinitionIndex::WEAPON_HEALTHSHOT, "u" },
+		{ ItemDefinitionIndex::WEAPON_SHIELD, "p" },
+		{ ItemDefinitionIndex::WEAPON_TAGRENADE, "i" },
+		{ ItemDefinitionIndex::WEAPON_BREACHCHARGE, "o" }
+};
+
 Visuals::Visuals()
 {
 	InitializeCriticalSection(&cs);
@@ -174,12 +244,19 @@ void Visuals::Player::RenderArmour()
 
 void Visuals::Player::RenderWeaponName()
 {
+	if (g_Configurations.esp_player_weapons_type == 0)
+		return;
+
 	auto weapon = ctx.pl->m_hActiveWeapon().Get();
 
 	if (!weapon)
 		return;
 
+	
+	if (g_Configurations.esp_player_weapons_type == 1)
 	Render::Get().RenderText(weapon->get_name().c_str(), ctx.feet_pos.x, ctx.feet_pos.y, 14.f, ctx.clr, true, g_pDefaultFont);
+	else
+	Render::Get().RenderText(m_weapon_icons[weapon->GetItemDefinitionIndex()], ctx.feet_pos.x, ctx.feet_pos.y, 14.f, ctx.clr, true, true, g_IconEsp);
 }
 
 void Visuals::Player::RenderSnapline()
@@ -233,7 +310,12 @@ void Visuals::RenderWeapon(C_BaseCombatWeapon* ent)
 	auto sz = g_pDefaultFont->CalcTextSizeA(14.f, FLT_MAX, 0.0f, name);
 	int w = bbox.right - bbox.left;
 
+	if (g_Configurations.esp_dropped_weapons_type == 0)
+		return;
+	else if (g_Configurations.esp_dropped_weapons_type == 1)
 	Render::Get().RenderText(name, ImVec2((bbox.left + w * 0.5f) - sz.x * 0.5f, bbox.bottom + 1), 14.f, (Color)g_Configurations.color_esp_weapons);
+	else
+	Render::Get().RenderText(m_weapon_icons[ent->GetItemDefinitionIndex()], ImVec2((bbox.left + w * 0.5f) - sz.x * 0.5f, bbox.bottom + 1), 14.f, (Color)g_Configurations.color_esp_weapons, true, true, g_IconEsp);
 }
 
 void Visuals::RenderDefuseKit(C_BaseEntity* ent)
@@ -440,38 +522,27 @@ void Visuals::Nightmode() {
 		if (!pMaterial->IsPrecached())
 			continue;
 
-		if (strstr(pMaterial->GetTextureGroupName(), "World") && enabled)
+		if (strstr(pMaterial->GetTextureGroupName(), "World") && enabled && !g_Unload)
 		{
 			pMaterial->ColorModulate(world_color[0], world_color[1], world_color[2]);
 			pMaterial->AlphaModulate(world_color[3]);
 		}
-		else if (strstr(pMaterial->GetTextureGroupName(), "World") && !enabled || g_Unload)
+		else if (strstr(pMaterial->GetTextureGroupName(), "World") && !enabled || strstr(pMaterial->GetTextureGroupName(), "StaticProp") && !enabled ||  strstr(pMaterial->GetTextureGroupName(), "SkyBox") && !enabled || g_Unload)
 		{
 			pMaterial->ColorModulate(1.f, 1.f, 1.f);
 			pMaterial->AlphaModulate(1.f);
 		}
 
-
-		if (strstr(pMaterial->GetTextureGroupName(), "StaticProp") && enabled)
+		if (strstr(pMaterial->GetTextureGroupName(), "StaticProp") && enabled && !g_Unload)
 		{
 			pMaterial->ColorModulate(prop_color[0], prop_color[1], prop_color[2]);
 			pMaterial->AlphaModulate(prop_color[3]);
 		}
-		else if (strstr(pMaterial->GetTextureGroupName(), "StaticProp") && !enabled || g_Unload)
-		{
-			pMaterial->ColorModulate(1.f, 1.f, 1.f);
-			pMaterial->AlphaModulate(1.f);
-		}
 
-		if (strstr(pMaterial->GetTextureGroupName(), "SkyBox") && enabled)
+		if (strstr(pMaterial->GetTextureGroupName(), "SkyBox") && enabled && !g_Unload)
 		{
 			pMaterial->ColorModulate(sky_color[0], sky_color[1], sky_color[2]);
 			pMaterial->AlphaModulate(sky_color[3]);
-		}
-		else if (strstr(pMaterial->GetTextureGroupName(), "SkyBox") && !enabled || g_Unload)
-		{
-			pMaterial->ColorModulate(1.f, 1.f, 1.f);
-			pMaterial->AlphaModulate(1.f);
 		}
 	}
 }
@@ -499,8 +570,8 @@ void Visuals::AddToDrawList()
 				if (g_Configurations.esp_player_snaplines) 
 					player.RenderSnapline();
 				if (g_Configurations.esp_player_boxes)     
-					player.RenderBox();
-				if (g_Configurations.esp_player_weapons)   
+					player.RenderBox();  
+
 					player.RenderWeaponName();
 				if (g_Configurations.esp_player_names)     
 					player.RenderName();

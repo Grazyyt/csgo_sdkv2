@@ -234,20 +234,31 @@ namespace ImGuiEx
         IM_ASSERT(!(flags & ImGuiInputTextFlags_Multiline));
         return ImGui::InputTextEx(label, hint, buf, (int)buf_size, ImVec2(0, 0), flags, callback, user_data);
     }
+
+    void TextCentered(std::string text) {
+        auto windowWidth = ImGui::GetWindowSize().x;
+        auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+
+        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+        ImGui::Text(text.c_str());
+    }
 }
 
 template<size_t N>
-void render_tabs(char* (&names)[N], int& activetab, float w, float h, bool sameline)
+void render_tabs(char* (&names)[N], int& activetab, float w, float h, float space, bool sameline)
 {
     for(auto i = 0; i < N; ++i)
     {
-        if(ImGui::Button(names[i], ImVec2{ w, h })) 
+        if(ImGui::Button(names[i], ImVec2{ w, h }))
         {
             activetab = i;
         }
 
         if(sameline && i < N - 1)
             ImGui::SameLine();
+        
+        ImVec2 windowpos = ImGui::GetCursorPos();
+        ImGui::SetCursorPos(ImVec2(windowpos.x + space, windowpos.y));
     }
 }
 
@@ -274,13 +285,19 @@ void RenderEspTab()
         ImGui::Checkbox("Names", &g_Configurations.esp_player_names);
         ImGui::Checkbox("Health", &g_Configurations.esp_player_health);
         ImGui::Checkbox("Armour", &g_Configurations.esp_player_armour);
-        ImGui::Checkbox("Weapon", &g_Configurations.esp_player_weapons);
+        ImGui::Text("Weapon");
+        ImGui::Combo("##Weaponesptype", &g_Configurations.esp_player_weapons_type, weaponesptype, IM_ARRAYSIZE(weaponesptype));
         ImGui::Checkbox("Snaplines", &g_Configurations.esp_player_snaplines);
 
         ImGui::NextColumn();
 
         ImGui::Checkbox("Crosshair", &g_Configurations.esp_crosshair);
         ImGui::Checkbox("Dropped Weapons", &g_Configurations.esp_dropped_weapons);
+        if (g_Configurations.esp_dropped_weapons)
+        {
+            ImGui::Text("Type");
+            ImGui::Combo("##Weaponespdroppedtype", &g_Configurations.esp_dropped_weapons_type, weaponesptype, IM_ARRAYSIZE(weaponesptype));
+        }
         ImGui::Checkbox("Defuse Kit", &g_Configurations.esp_defuse_kit);
         ImGui::Checkbox("Planted C4", &g_Configurations.esp_planted_c4);
         ImGui::Checkbox("Item Esp", &g_Configurations.esp_items);
@@ -435,8 +452,21 @@ void RenderMiscTab()
         ImGui::Checkbox("Auto strafe", &g_Configurations.misc_autostrafe);
 		ImGui::Checkbox("Third Person", &g_Configurations.misc_thirdperson);
 
-		if(&g_Configurations.misc_thirdperson)
+		if(g_Configurations.misc_thirdperson)
 			ImGui::SliderFloat("Distance", &g_Configurations.misc_thirdperson_dist, 0.f, 150.f);
+
+        ImGui::Checkbox("EdgeJump", &g_Configurations.misc_edgejump);
+        if (g_Configurations.misc_edgejump)
+        {
+            ImGui::SameLine();
+            ImGuiEx::Hotkey("##EJKeybind", &g_Configurations.misc_edgejumpkey, ImVec2(100, 20));
+        }
+        ImGui::Checkbox("JumpBug", &g_Configurations.misc_jumpbug);
+        if (g_Configurations.misc_jumpbug)
+        {
+            ImGui::SameLine();
+            ImGuiEx::Hotkey("##JBKeybind", &g_Configurations.misc_jumpbugkey, ImVec2(100, 20));
+        }
 
         ImGui::Checkbox("No hands", &g_Configurations.misc_no_hands);
 		ImGui::Checkbox("Rank reveal", &g_Configurations.misc_showranks);
@@ -452,11 +482,14 @@ void RenderMiscTab()
 
 		ImGui::NextColumn();
 
-        ImGui::SliderInt("Viewmodel FOV:", &g_Configurations.misc_viewmodel_fov, 68, 120);
+        ImGui::Text("Viewmodel:");
+        ImGui::SliderInt("FOV", &g_Configurations.misc_viewmodel_fov, 68, 120);
 		ImGui::Text("Postprocessing:");
         ImGui::SliderFloat("Red", &g_Configurations.misc_mat_ambient_light_r, 0, 1);
         ImGui::SliderFloat("Green", &g_Configurations.misc_mat_ambient_light_g, 0, 1);
         ImGui::SliderFloat("Blue", &g_Configurations.misc_mat_ambient_light_b, 0, 1);
+        //ImGui::Text("Knife Model:");
+        //ImGui::Combo("##knifemodel", &g_Configurations.misc_knifemodel, knifemodels, IM_ARRAYSIZE(knifemodels));
 
         ImGui::Columns(1, nullptr, false);
     }
@@ -772,7 +805,7 @@ void Menu::OnDeviceReset()
 
 void Menu::Render()
 {
-    ImGui::GetIO().MouseDrawCursor = _visible;
+    //ImGui::GetIO().MouseDrawCursor = _visible;
 
     if (!_visible)
         return;
@@ -780,18 +813,39 @@ void Menu::Render()
     const auto sidebar_size = get_sidebar_size();
     static int active_sidebar_tab = 0;
 
-    if (ImGui::Begin("csgo_sdk", &_visible, ImGuiWindowFlags_NoCollapse))
+    ImVec2 main_pos;
+    ImVec2 main_size;
+
+    ImGui::SetNextWindowSize(ImVec2{ 930, 5 }, ImGuiSetCond_Once);
+
+    if (ImGui::Begin("csgo_sdk_main", &_visible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar))
+    {
+        main_pos = ImGui::GetWindowPos();
+        main_size = ImGui::GetWindowSize();
+
+        ImGui::BeginGroup();
+        {
+            ImGuiEx::TextCentered("csgo_sdk");
+        }
+        ImGui::EndGroup();
+        ImGui::End();
+    }
+
+    ImGui::SetNextWindowSize(ImVec2{ 930, 400 }, ImGuiSetCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(main_pos.x, main_pos.y + 35.f));
+
+    if (ImGui::Begin("csgo_sdk_sub", &_visible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar))
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
         {
             ImGui::BeginGroup();
             {
-                render_tabs(sidebar_tabs, active_sidebar_tab, get_sidebar_item_width(), get_sidebar_item_height(), false);
+                render_tabs(sidebar_tabs, active_sidebar_tab, get_sidebar_item_width(), get_sidebar_item_height(), 3, true);
             }
             ImGui::EndGroup();
         }
         ImGui::PopStyleVar();
-        ImGui::SameLine();
+        ImGui::Dummy(ImVec2(0,5));
 
         auto size = ImVec2{ 0.0f, sidebar_size.y };
 

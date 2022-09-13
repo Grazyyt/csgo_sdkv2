@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "../csgostructs.hpp"
 #include "Math.hpp"
@@ -295,5 +296,19 @@ namespace Utils {
         static auto do_once = (nameConvar->SetValue("\n���"), true);
 
         nameConvar->SetValue(name);
+    }
+
+    void modern_clamp_world(float& target, float to, float step)
+    {
+        if (target > to)
+        {
+            target = std::clamp(target - step, to, 1.f);
+
+        }
+        else if (target < to)
+        {
+            target = std::clamp(target + step, 0.f, to);
+
+        }
     }
 }

@@ -84,9 +84,11 @@ public:
 		CONFIGURATION(bool, esp_player_health, false);
 		CONFIGURATION(bool, esp_player_armour, false);
 		CONFIGURATION(bool, esp_player_weapons, false);
+		CONFIGURATION(int,  esp_player_weapons_type, 0);
 		CONFIGURATION(bool, esp_player_snaplines, false);
 		CONFIGURATION(bool, esp_crosshair, false);
 		CONFIGURATION(bool, esp_dropped_weapons, false);
+		CONFIGURATION(int,  esp_dropped_weapons_type, 0);
 		CONFIGURATION(bool, esp_defuse_kit, false);
 		CONFIGURATION(bool, esp_planted_c4, false);
 		CONFIGURATION(bool, esp_items, false);
@@ -150,6 +152,12 @@ public:
 
 		CONFIGURATION(bool, misc_nightmode, false);
 		CONFIGURATION(bool, misc_no_fog, false);
+		CONFIGURATION(bool, misc_edgejump, false);
+		CONFIGURATION(int, misc_edgejumpkey, 0);
+		CONFIGURATION(bool, misc_jumpbug, false);
+		CONFIGURATION(int, misc_jumpbugkey, 0);
+
+		CONFIGURATION(int, misc_knifemodel, 0);
 
 		// 
 		// COLORS
