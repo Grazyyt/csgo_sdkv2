@@ -488,8 +488,8 @@ void RenderMiscTab()
         ImGui::SliderFloat("Red", &g_Configurations.misc_mat_ambient_light_r, 0, 1);
         ImGui::SliderFloat("Green", &g_Configurations.misc_mat_ambient_light_g, 0, 1);
         ImGui::SliderFloat("Blue", &g_Configurations.misc_mat_ambient_light_b, 0, 1);
-        //ImGui::Text("Knife Model:");
-        //ImGui::Combo("##knifemodel", &g_Configurations.misc_knifemodel, knifemodels, IM_ARRAYSIZE(knifemodels));
+        ImGui::Text("Knife Model:");
+        ImGui::Combo("##knifemodel", &g_Configurations.misc_knifemodel, knifemodels, IM_ARRAYSIZE(knifemodels));
 
         ImGui::Columns(1, nullptr, false);
     }

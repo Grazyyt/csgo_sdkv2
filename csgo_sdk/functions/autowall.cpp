@@ -331,7 +331,7 @@ bool Autowall::SimulateFireBullet(C_BaseCombatWeapon* pWeapon, FireBulletData& d
 
 	while (data.penetrate_count > 0 && data.current_damage >= 1.0f) 
 	{
-		data.trace_length_remaining = weaponInfo->flRange - data.trace_length;
+		data.trace_length_remaining = weaponInfo->flWeaponRange - data.trace_length;
 		Vector end = data.src + data.direction * data.trace_length_remaining;
 		TraceLine(data.src, end, MASK_SHOT, g_LocalPlayer, &data.enter_trace);
 

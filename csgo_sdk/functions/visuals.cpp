@@ -7,6 +7,7 @@
 #include "../configurations.hpp"
 #include "../sdk/utils/math.hpp"
 #include "../sdk/utils/utils.hpp"
+#include "../helpers/events.hpp"
 
 #include "../imgui/imgui.h"
 
@@ -355,6 +356,267 @@ void Visuals::RenderPlantedC4(C_BaseEntity* ent)
 	Render::Get().RenderText(name, ImVec2((bbox.left + w * 0.5f) - sz.x * 0.5f, bbox.bottom + 1), 14.f, (Color)g_Configurations.color_esp_c4);
 }
 
+float GetDefuseTime(C_PlantedC4* bomb)
+{
+	static float defuse_time = -1;
+
+	if (!bomb)
+		return 0;
+
+	if (!bomb->m_hBombDefuser())
+		defuse_time = -1;
+
+	else if (defuse_time == -1)
+		defuse_time = g_GlobalVars->curtime + bomb->m_flDefuseLength();
+
+	if (defuse_time > -1 && bomb->m_hBombDefuser())
+		return defuse_time - g_GlobalVars->curtime;
+
+	return 0;
+}
+
+C_BasePlayer* GetBombPlayer()
+{
+	for (auto i = 1; i <= g_EntityList->GetHighestEntityIndex(); ++i)
+	{
+		auto* entity = C_BasePlayer::GetPlayerByIndex(i);
+		if (!entity || entity->IsPlayer() || entity->IsDormant() || entity == g_LocalPlayer)
+			continue;
+
+		if (entity->IsPlantedC4())
+			return entity;
+	}
+
+	return nullptr;
+}
+
+C_PlantedC4* GetBomb()
+{
+	C_BaseEntity* entity;
+	for (auto i = 1; i <= g_EntityList->GetMaxEntities(); ++i)
+	{
+		entity = C_BaseEntity::GetEntityByIndex(i);
+		if (entity && !entity->IsDormant() && entity->IsPlantedC4())
+			return reinterpret_cast<C_PlantedC4*>(entity);
+	}
+
+	return nullptr;
+}
+
+void Visuals::RenderC4Window(C_BaseEntity* ent)
+{
+	if (!ent)
+		return;
+
+	float bombTimer = ent->m_flC4Blow() - (g_LocalPlayer->m_nTickBase() * g_GlobalVars->interval_per_tick);
+
+	int x;
+	int y;
+
+	g_EngineClient->GetScreenSize(x, y);
+
+	int windowX = 0;
+	int windowY = y - 430;
+
+	int windowSizeX = 120;
+	static int windowSizeY = 0;
+	const auto bomb = GetBomb();
+
+
+
+	if (!bomb)
+		return;
+
+	if (bombTimer < 0)
+		return;
+
+	if (bomb->m_bBombDefused())
+		return;
+
+	int site = ent->m_nBombSite();
+
+	int w, h;
+
+	g_EngineClient->GetScreenSize(w, h);
+
+	std::string namemap = g_EngineClient->GetLevelNameShort();
+
+	std::string ssffee;
+
+	if (!site)
+		ssffee = "A";
+	else
+		ssffee = "B";
+	
+
+	Color yaint = Color(255, 100, 100, 255);
+	Color yaint2 = Color(255, 100, 100, 255);
+	float fldefuse = ent->m_flDefuseCountDown();
+	float DefuseTimeRemaining = fldefuse - (g_LocalPlayer->m_nTickBase() * g_GlobalVars->interval_per_tick);
+
+	if (bombTimer > 10)
+	{
+		yaint = Color(0, 255, 0, 255);
+	}
+	else if (bombTimer > 5)
+	{
+		yaint = Color(255, 255, 0, 255);
+	}
+	else if (bombTimer > 0)
+	{
+		yaint = Color(255, 0, 0, 255);
+	}
+
+	if (bombTimer >= DefuseTimeRemaining)
+	{
+		yaint2 = Color(0, 255, 255, 255);
+	}
+	else if (bombTimer > 0)
+	{
+		yaint2 = Color(255, 0, 0, 255);
+	}
+
+
+	Render::Get().RenderText(ssffee.c_str(), w / w + 10, h / h + 10, 40, g_LocalPlayer->m_iTeamNum() == 3 ? Color(255, 50, 50, 255) : Color(50, 255, 50, 255));
+
+	Render::Get().RenderBoxFilled(windowX, windowY, windowX + windowSizeX, windowY + windowSizeY, Color(0, 0, 0, 100));
+	Render::Get().RenderBoxFilled(windowX, windowY, windowX + 2, windowY + windowSizeY, Color(0, 0, 200, 100));
+
+	Render::Get().RenderText("bomb: ", ImVec2(windowX + 4, windowY + 2), 15, Color(255, 255, 255, 255), false, false, g_SmallFont);	
+	ImVec2 textSize_bomb = g_SmallFont->CalcTextSizeA(15, FLT_MAX, 0.0f, "bomb: ");	
+	std::string bomb_timer_text;
+
+	char buff[228];
+
+	snprintf(buff, sizeof(buff), "%4.3f", bombTimer);
+
+	bomb_timer_text = buff;
+
+	float time = GetDefuseTime(bomb);
+
+	Render::Get().RenderText(bombTimer >= 0 ? bomb_timer_text : "0", ImVec2(windowX + 4 + textSize_bomb.x, windowY + 2), 15, yaint, false, false, g_SmallFont);	
+
+	ImVec2 textSize_defuse = g_SmallFont->CalcTextSizeA(15, FLT_MAX, 0.0f, "defuse: ");	
+
+
+	std::string defuse_timer_text;
+	char buff_2[228];
+
+	snprintf(buff_2, sizeof(buff_2), "%4.3f", time);
+
+	defuse_timer_text = buff_2;
+
+	const auto bomb_1 = GetBombPlayer();
+
+	if (!bomb_1)
+		return;
+
+	float flArmor = g_LocalPlayer->m_ArmorValue();
+	float flHealth = g_LocalPlayer->m_iHealth();
+	float flDistance = g_LocalPlayer->GetEyePos().DistTo(bomb_1->GetAbsOrigin());
+
+	float a = 450.7f;
+	float b = 75.68f;
+	float c = 789.2f;
+	float d = ((flDistance - b) / c);
+	float flDamage = a * exp(-d * d);
+
+	float flDmg = flDamage;
+
+	if (flArmor > 0)
+	{
+		float flNew = flDmg * 0.5f;
+		float flArmor = (flDmg - flNew) * 0.5f;
+
+		if (flArmor > static_cast<float>(flArmor))
+		{
+			flArmor = static_cast<float>(flArmor) * (1.f / 0.5f);
+			flNew = flDmg - flArmor;
+		}
+
+		flDamage = flNew;
+	}
+
+	std::string damage;
+	char buff_3[228];
+
+	snprintf(buff_3, sizeof(buff_3), "%i", (int)flDamage);
+
+	damage = buff_3;
+
+	ImVec2 textSize_damage = g_SmallFont->CalcTextSizeA(15, FLT_MAX, 0.0f, "damage: ");	
+
+	if (GetDefuseTime(bomb) > 0)
+	{
+		Render::Get().RenderText("defuse: ", ImVec2(windowX + 4, windowY + 12), 15, Color(255, 255, 255, 255), false, false, g_SmallFont);	
+		if (bombTimer < time - 0.15)
+		{
+			Render::Get().RenderText(defuse_timer_text, ImVec2(windowX + 4 + textSize_defuse.x, windowY + 12), 15, Color(255, 50, 50, 255), false, false, g_SmallFont);	
+		}
+		else if (bombTimer >= time - 0.15)
+		{
+			Render::Get().RenderText(defuse_timer_text, ImVec2(windowX + 4 + textSize_defuse.x, windowY + 12), 15, Color(50, 255, 50, 255), false, false, g_SmallFont);	
+		}
+		if (flDamage > 1 && bombTimer >= 0)
+		{
+			Render::Get().RenderText("damage: ", ImVec2(windowX + 4, windowY + 22), 15, Color(255, 255, 255, 255), false, 0, g_SmallFont); 	
+			Render::Get().RenderText(flDamage < flHealth ? damage : "you dead", ImVec2(windowX + 4 + textSize_damage.x, windowY + 22), 15, Color(255, 50, 50, 255), false, false, g_SmallFont);
+			windowSizeY = 37;
+		}
+		else
+		{
+			windowSizeY = 25;
+		}
+
+		float box_w = (float)fabs(0 - windowSizeX);
+
+		float max_time;
+
+		float width;
+
+		if (g_Events.bomb_defusing_with_kits)
+		{
+			width = (((box_w * time) / 5.f));
+		}
+		else
+		{
+			width = (((box_w * time) / 10.f));
+		}
+
+		Render::Get().RenderBoxFilled(windowX, windowY + windowSizeY + 5, windowX + (int)width, windowY + windowSizeY + 10, yaint2);
+
+	}
+	else if (GetDefuseTime(bomb) <= 0)
+	{
+		if (flDamage > 1 && bombTimer >= 0)
+		{
+			Render::Get().RenderText("damage: ", ImVec2(windowX + 4, windowY + 12), 15, Color(255, 255, 255, 255), false, false, g_SmallFont); 	
+			Render::Get().RenderText(flDamage < flHealth ? damage : "you dead", ImVec2(windowX + 4 + textSize_damage.x, windowY + 12), 15, Color(255, 50, 50, 255), false, false, g_SmallFont);
+			windowSizeY = 27;
+		}
+		else
+		{
+			windowSizeY = 17;
+		}
+	}
+
+	float box_w = (float)fabs(0 - windowSizeX);
+
+	auto width = (((box_w * bombTimer) / ent->m_flTimerLength()));
+	Render::Get().RenderBoxFilled(windowX, windowY + windowSizeY, windowX + (int)width, windowY + windowSizeY + 5, yaint);
+
+	Render::Get().RenderCircleFilled(w / 2, y / 2 - 400, 40, 40, Color(50, 50, 50, 100));
+	Render::Get().RenderText("o", ImVec2(w / 2, y / 2 - 415), 30, Color(255, 255, 255, 200), true, true, g_IconEsp);
+
+	C_BasePlayer* Defuser = (C_BasePlayer*)C_BasePlayer::get_entity_from_handle(ent->m_hBombDefuser());
+
+	if (Defuser)
+		Render::Get().CircularProgressBar(w / 2, y / 2 - 400, 37, 40, 0, 360 * (DefuseTimeRemaining / (Defuser->m_bHasDefuser() ? 5 : 10)), yaint2, true);
+	else
+		Render::Get().CircularProgressBar(w / 2, y / 2 - 400, 37, 40, 0, 360 * (bombTimer / ent->m_flTimerLength()), yaint, true);
+
+}
+
 void Visuals::RenderItemEsp(C_BaseEntity* ent)
 {
 	std::string itemstr = "Undefined";
@@ -586,7 +848,7 @@ void Visuals::AddToDrawList()
 		else if (g_Configurations.esp_dropped_weapons && entity->IsDefuseKit())
 			RenderDefuseKit(entity);
 		else if (entity->IsPlantedC4() && g_Configurations.esp_planted_c4)
-			RenderPlantedC4(entity);
+			RenderC4Window(entity);
 		else if (entity->IsLoot() && g_Configurations.esp_items)
 			RenderItemEsp(entity);
 	}

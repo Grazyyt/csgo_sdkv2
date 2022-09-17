@@ -16,6 +16,7 @@
 ImFont* g_pDefaultFont;
 ImFont* g_pSecondFont;
 ImFont* g_IconEsp;
+ImFont* g_SmallFont;
 
 ImDrawListSharedData _data;
 
@@ -51,6 +52,13 @@ void Render::GetFonts()
 		Fonts::undefeated_compressed_data,
 		Fonts::undefeated_compressed_size,
 		16.f,
+		nullptr,
+		ImGui::GetIO().Fonts->GetGlyphRangesCyrillic());
+
+	g_SmallFont = ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF(
+		Fonts::Droid_compressed_data,
+		Fonts::Droid_compressed_size,
+		12.f,
 		nullptr,
 		ImGui::GetIO().Fonts->GetGlyphRangesCyrillic());
 }
@@ -133,4 +141,25 @@ void Render::RenderCircle3D(Vector position, float points, float radius, Color c
 
 		RenderLine(start2d.x, start2d.y, end2d.x, end2d.y, color);
 	}
+}
+void Render::CircularProgressBar(int x, int y, int r1, int r2, int s, int d, Color col, bool inverse)
+
+{
+
+	for (int i = s; i < s + d; i++)
+
+	{
+
+		auto rad = i * M_PI / 180;
+
+		if (!inverse)
+
+			RenderLine(x + cos(rad) * r1, y + sin(rad) * r1, x + cos(rad) * r2, y + sin(rad) * r2, col);
+
+		else
+
+			RenderLine(x - sin(rad) * r1, y - cos(rad) * r1, x - sin(rad) * r2, y - cos(rad) * r2, col);
+
+	}
+
 }

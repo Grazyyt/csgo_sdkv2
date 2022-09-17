@@ -30,17 +30,18 @@ namespace Hooks
     void Initialize();
     void Shutdown();
 
-    inline vfunc_hook hlclient_hook;
-	inline vfunc_hook direct3d_hook;
-	inline vfunc_hook vguipanel_hook;
-	inline vfunc_hook vguisurf_hook;
-	inline vfunc_hook mdlrender_hook;
-	inline vfunc_hook viewrender_hook;
-	inline vfunc_hook sound_hook;
-	inline vfunc_hook clientmode_hook;
-	inline vfunc_hook sv_cheats;
-	inline vfunc_hook gameevents_vhook;
-	inline vfunc_hook netchannel_vhook;
+    inline vfunc_hook		hlclient_hook;
+	inline vfunc_hook		direct3d_hook;
+	inline vfunc_hook		vguipanel_hook;
+	inline vfunc_hook		vguisurf_hook;
+	inline vfunc_hook		mdlrender_hook;
+	inline vfunc_hook		viewrender_hook;
+	inline vfunc_hook		sound_hook;
+	inline vfunc_hook		clientmode_hook;
+	inline vfunc_hook		sv_cheats;
+	inline vfunc_hook		gameevents_vhook;
+	inline vfunc_hook		netchannel_vhook;
+	inline RecvPropHook*	sequence_vhook;
 
 
 	typedef bool(__thiscall* sendnetmsg_fn)(void*, INetMessage* msg, bool reliable, bool voice);
@@ -60,4 +61,5 @@ namespace Hooks
 	bool __fastcall hkShouldDrawFog(void* ecx, void* edx);
 	bool __fastcall hkSendNetMsg(void* ecx, void* edx, INetMessage* msg, bool reliable, bool voice);
 	bool __stdcall hkFireEvent(IGameEvent* pEvent);
+	void hkRecvProxy(const CRecvProxyData* pData, void* entity, void* output);
 }

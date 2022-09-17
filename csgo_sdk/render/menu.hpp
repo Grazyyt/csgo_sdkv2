@@ -80,8 +80,8 @@ const char* const KeyNames[] =
     "VK_RBUTTON",
     "VK_CANCEL",
     "VK_MBUTTON",
-    "VK_XBUTTON1",
-    "VK_XBUTTON2",
+    "M4",
+    "M5",
     "Unknown",
     "VK_BACK",
     "VK_TAB",
@@ -246,7 +246,25 @@ const char* const KeyNames[] =
 const char* const knifemodels[] =
 {
     "Default",
-    "M9 Bayonet",
+    "Bayonet",
+    "Classic",
+    "Flip",
+    "Gut",
+    "Karambit",
+    "M9Bayonet",
+    "Huntsman",
+    "Falchion",
+    "Bowie",
+    "Butterfly",
+    "Daggers",
+    "Paracord",
+    "Survival",
+    "Ursus",
+    "Navaja",
+    "Nomad",
+    "Stiletto",
+    "Talon",
+    "Skeleton",
 };
 
 const char* const weaponesptype[] =

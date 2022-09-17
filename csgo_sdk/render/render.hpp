@@ -21,6 +21,7 @@
 extern ImFont* g_pDefaultFont;
 extern ImFont* g_pSecondFont;
 extern ImFont* g_IconEsp;
+extern ImFont* g_SmallFont;
 
 class Vector;
 
@@ -49,6 +50,8 @@ public:
 	float RenderText(const std::string& text, ImVec2 position, float size, Color color, bool center = false, bool outline = true, ImFont* pFont = g_pDefaultFont);
 
 	void RenderCircle3D(Vector position, float points, float radius, Color color);
+
+	void CircularProgressBar(int x, int y, int r1, int r2, int s, int d, Color col, bool inverse);
 
 	void RenderImage(ImTextureID user_texture_id, const ImVec2& a, const ImVec2& b, const ImVec2& uv_a = ImVec2(0, 0), const ImVec2& uv_b = ImVec2(1, 1), ImU32 col = 0xFFFFFFFF) {
 		draw_list->AddImage(user_texture_id, a, b, uv_a, uv_b, col);

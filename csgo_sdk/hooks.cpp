@@ -14,6 +14,8 @@
 #include "functions/grenade_pred.hpp"
 #include "functions/aimbot.hpp"
 #include "functions/backtrack.hpp"
+#include "functions/knifechanger.hpp"
+#include "helpers/eventlistener.h"
 
 #pragma intrinsic(_ReturnAddress)
 
@@ -40,6 +42,8 @@ namespace Hooks
 		sv_cheats.setup(sv_cheats_con);
 		gameevents_vhook.setup(g_GameEvents);
 
+		g_CustomEventsManager.Init();
+
 		direct3d_hook.hook_index(index::EndScene, hkEndScene);
 		direct3d_hook.hook_index(index::Reset, hkReset);
 		hlclient_hook.hook_index(index::FrameStageNotify, hkFrameStageNotify);
@@ -53,6 +57,7 @@ namespace Hooks
 		sv_cheats.hook_index(index::SvCheatsGetBool, hkSvCheatsGetBool);
 		clientmode_hook.hook_index(index::ShouldDrawFog, hkShouldDrawFog);
 		gameevents_vhook.hook_index(index::FireEvent, hkFireEvent);
+		sequence_vhook = new RecvPropHook(C_BaseViewModel::m_nSequence(), hkRecvProxy);
 
 		anti_cheat_fix();
 	}
@@ -67,6 +72,9 @@ namespace Hooks
 		clientmode_hook.unhook_all();
 		sound_hook.unhook_all();
 		sv_cheats.unhook_all();
+		sequence_vhook->~RecvPropHook();
+
+		g_CustomEventsManager.Unload();
 
 		Glow::Get().Shutdown();
 	}
@@ -273,6 +281,12 @@ namespace Hooks
 	{
 		static auto ofunc = hlclient_hook.get_original<void(__thiscall*)(IBaseClientDLL*, ClientFrameStage_t)>(index::FrameStageNotify);
 
+		if (stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START)
+		{
+			if (g_EngineClient->IsInGame() && g_EngineClient->IsConnected())
+				skins::knifes::UpdateKnife();
+		}
+
 		Visuals::Get().Nightmode();
 
 		return ofunc(g_CHLClient, stage);
@@ -371,6 +385,34 @@ namespace Hooks
 			}
 		}
 
+
+		if (!strcmp(pEvent->GetName(), "player_death"))
+		{
+			//C_BasePlayer* hurt = (C_BasePlayer*)g_EntityList->GetClientEntity(g_EngineClient->GetPlayerForUserID(event->GetInt("userid")));
+			//C_BasePlayer* attacker = (C_BasePlayer*)g_EntityList->GetClientEntity(g_EngineClient->GetPlayerForUserID(event->GetInt("attacker")));
+			// (g_EngineClient->GetPlayerForUserID(event->GetInt("attacker")) == g_EngineClient->GetLocalPlayer() && g_EngineClient->GetPlayerForUserID(event->GetInt("userid")) != g_EngineClient->GetLocalPlayer())
+			auto attacker = (C_BasePlayer*)g_EntityList->GetClientEntity(g_EngineClient->GetPlayerForUserID(pEvent->GetInt("attacker")));
+			if (attacker && attacker->EntIndex() == g_EngineClient->GetLocalPlayer())
+			{
+				if (Events::Get().IsKnifeString(pEvent->GetString("weapon")))
+				{
+					pEvent->SetString("weapon", skins::knifes::UpdateKillIcons());
+				}
+			}
+		}
+
 		return oFireEvent(g_GameEvents, pEvent);
+	}
+	void hkRecvProxy(const CRecvProxyData* pData, void* entity, void* output)
+	{
+		static auto original_fn = sequence_vhook->get_original_function();
+		const auto local = static_cast<C_BasePlayer*>(g_EntityList->GetClientEntity(g_EngineClient->GetLocalPlayer()));
+		const auto proxy_data = const_cast<CRecvProxyData*>(pData);
+		const auto view_model = static_cast<C_BaseViewModel*>(entity);
+
+		skins::knifes::DoSequenceRemapping(proxy_data, view_model);
+		
+
+		original_fn(pData, entity, output);
 	}
 }

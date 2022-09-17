@@ -40,6 +40,7 @@ public:
 	void RenderWeapon(C_BaseCombatWeapon* ent);
 	void RenderDefuseKit(C_BaseEntity* ent);
 	void RenderPlantedC4(C_BaseEntity* ent);
+	void RenderC4Window(C_BaseEntity* ent);
 	void RenderItemEsp(C_BaseEntity* ent);
 	void ThirdPerson();
 	void DrawFOV();

@@ -7,7 +7,7 @@ constexpr auto VALVE_ADDED_FUNCS = 0ull;
 
 bool C_BaseEntity::IsPlayer()
 {
-	return CallVFunction<bool(__thiscall*)(C_BaseEntity*)>(this, 157 + VALVE_ADDED_FUNCS)(this);
+	return CallVFunction<bool(__thiscall*)(C_BaseEntity*)>(this, 158 + VALVE_ADDED_FUNCS)(this);
 }
 
 bool C_BaseEntity::IsLoot() 
@@ -40,7 +40,7 @@ bool C_BaseEntity::IsDefuseKit()
 
 CCSWeaponInfo* C_BaseCombatWeapon::GetCSWeaponData()
 {
-	return g_WeaponSystem->GetWpnData(this->m_Item().m_iItemDefinitionIndex());
+	return CallVFunction<CCSWeaponInfo* (__thiscall*)(void*)>(this, 461)(this);
 }
 
 bool C_BaseCombatWeapon::HasBullets()
@@ -326,7 +326,7 @@ int C_BasePlayer::GetSequenceActivity(int sequence)
 	if (!hdr)
 		return -1;
 
-	static auto get_sequence_activity = reinterpret_cast<int(__fastcall*)(void*, studiohdr_t*, int)>(Utils::PatternScan(GetModuleHandle("client.dll"), "55 8B EC 53 8B 5D 08 56 8B F1 83"));
+	static auto get_sequence_activity = reinterpret_cast<int(__fastcall*)(void*, studiohdr_t*, int)>(Utils::PatternScan(GetModuleHandleA("client.dll"), "55 8B EC 53 8B 5D 08 56 8B F1 83"));
 
 	return get_sequence_activity(this, hdr, sequence);
 }
@@ -521,7 +521,7 @@ bool C_BasePlayer::CanSeePlayer(C_BasePlayer* player, const Vector& pos)
 
 void C_BasePlayer::UpdateClientSideAnimation()
 {
-	return CallVFunction<void(__thiscall*)(void*)>(this, 223 + VALVE_ADDED_FUNCS)(this);
+	return CallVFunction<void(__thiscall*)(void*)>(this, 224 + VALVE_ADDED_FUNCS)(this);
 }
 
 bool C_BasePlayer::IsNotTarget()
@@ -573,10 +573,10 @@ void C_BaseAttributableItem::SetGloveModelIndex(int modelIndex)
 
 void C_BaseViewModel::SendViewModelMatchingSequence(int sequence)
 {
-	return CallVFunction<void(__thiscall*)(void*, int)>(this, 246 + VALVE_ADDED_FUNCS)(this, sequence);
+	return CallVFunction<void(__thiscall*)(void*, int)>(this, 247 + VALVE_ADDED_FUNCS)(this, sequence);
 }
 
 float_t C_BasePlayer::m_flSpawnTime()
 {
-	return *(float_t*)((uintptr_t)this + 0x103C0);
+	return *(float_t*)((uintptr_t)this + 0xA370);
 }

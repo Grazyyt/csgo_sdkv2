@@ -106,6 +106,14 @@ public:
 	NETVAR(CHandle<C_BasePlayer>, m_hOwnerEntity, "DT_BaseEntity", "m_hOwnerEntity");
 	NETVAR(bool, m_bSpotted, "DT_BaseEntity", "m_bSpotted");
 	NETVAR(float_t, m_flC4Blow, "DT_PlantedC4", "m_flC4Blow");
+	NETVAR(float_t, m_flTimerLength, "DT_PlantedC4", "m_flTimerLength");
+	NETVAR(float_t, m_flDefuseLength, "DT_PlantedC4", "m_flDefuseLength");
+	NETVAR(float_t, m_flDefuseCountDown, "DT_PlantedC4", "m_flDefuseCountDown");
+	NETVAR(CHandle<C_BasePlayer>, m_hBombDefuser, "DT_PlantedC4", "m_hBombDefuser");
+	NETVAR(int32_t, m_nBombSite, "DT_PlantedC4", "m_nBombSite");
+
+	NETVAR(Vector, bombsiteCenterA, "CCSPlayerResource", "m_bombsiteCenterA")
+	NETVAR(Vector, bombsiteCenterB, "CCSPlayerResource", "m_bombsiteCenterB")
 
 
 	const matrix3x4_t& m_rgflCoordinateFrame()
@@ -144,7 +152,7 @@ public:
 	NETVAR(int32_t, m_nFallbackPaintKit, "DT_BaseAttributableItem", "m_nFallbackPaintKit");
 	NETVAR(int32_t, m_nFallbackSeed, "DT_BaseAttributableItem", "m_nFallbackSeed");
 	NETVAR(float_t, m_flFallbackWear, "DT_BaseAttributableItem", "m_flFallbackWear");
-
+	NETVAR(unsigned long, m_hWeaponWorldModel, "DT_BaseCombatWeapon", "m_hWeaponWorldModel");
 	NETVAR(C_EconItemView, m_Item2, "DT_BaseAttributableItem", "m_Item");
 
 	C_EconItemView& m_Item()
@@ -330,6 +338,7 @@ public:
 	NETVAR(CHandle<C_BasePlayer>, m_hOwner, "DT_BaseViewModel", "m_hOwner");
 	NETPROP(m_nSequence, "DT_BaseViewModel", "m_nSequence");
 	void SendViewModelMatchingSequence(int sequence);
+	int GetSequenceActivity(int sequence);
 };
 
 class AnimationLayer
