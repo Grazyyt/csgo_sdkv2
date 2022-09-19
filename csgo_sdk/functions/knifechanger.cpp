@@ -2,10 +2,8 @@
 
 namespace skins::general
 {
-	struct hud_weapons_t
-	{
-		std::int32_t* wpn_count()
-		{
+	struct hud_weapons_t {
+		std::int32_t* GetWeaponCount() {
 			return reinterpret_cast<std::int32_t*>(std::uintptr_t(this) + 0x80);
 		}
 	};
@@ -18,12 +16,12 @@ namespace skins::general
 		static auto clear_hud_weapon_icon_fn = reinterpret_cast<std::int32_t(__thiscall*)(void*, std::int32_t)>(
 			Utils::PatternScan(GetModuleHandleA("client.dll"), "55 8B EC 51 53 56 8B 75 08 8B D9 57 6B"));
 
-		auto hud_weapons = Utils::FindHudElement<std::uintptr_t>(("CCSGO_HudWeaponSelection")) - 0x28;
+		auto hud_weapons = Utils::FindHudElement<hud_weapons_t>(("CCSGO_HudWeaponSelection")) - 0xa0;
 
 		if (hud_weapons == nullptr)
 			return;
 
-		for (std::size_t i = 0; i < *(hud_weapons + 0x20); i++)
+		for (std::size_t i = 0; i < *hud_weapons->GetWeaponCount(); i++)
 			i = clear_hud_weapon_icon_fn(hud_weapons, i);
 
 		g_ClientState->ForceFullUpdate();
@@ -61,10 +59,12 @@ namespace skins::knifes
 	void UpdateKnife()
 	{
 		if (!g_LocalPlayer)
-		{
-			skins::general::FullUpdate();
 			return;
-		}
+
+		const auto local_index = g_EngineClient->GetLocalPlayer();
+		player_info_t player_info;
+		if (!g_EngineClient->GetPlayerInfo(local_index, &player_info))
+			return;
 
 		auto weapons = g_LocalPlayer->m_hMyWeapons();
 		for (int i = 0; weapons[i].IsValid(); i++)
@@ -100,25 +100,20 @@ namespace skins::knifes
 					}
 				}
 
-				((C_BaseViewModel*)weapon)->m_nModelIndex() = model;
-				((C_BaseViewModel*)weapon)->m_nViewModelIndex() = model;
+				//((C_BaseViewModel*)weapon)->m_nModelIndex() = model;
+				//((C_BaseViewModel*)weapon)->m_nViewModelIndex() = model;
 
 				if (world_model)
 				{
 					world_model->m_nModelIndex() = model + 1;
 				}
-
+				weapon_attributable->m_nFallbackPaintKit() = g_Configurations.misc_knifeskin;
 				weapon_attributable->m_flFallbackWear() = 0.000000001f;
 				weapon_attributable->m_nFallbackSeed() = 0;
 				weapon_attributable->m_nFallbackStatTrak() = -1;
 				weapon_attributable->m_Item().m_iItemIDHigh() = -1;
 				weapon_attributable->m_Item().m_iEntityQuality() = 3;
-			}
-			static int last_knife = g_Configurations.misc_knifemodel;
-			if (last_knife != g_Configurations.misc_knifemodel)
-			{
-				skins::general::FullUpdate();
-				last_knife = g_Configurations.misc_knifemodel;
+				weapon_attributable->m_Item().m_iAccountID() = player_info.xuid_low;
 			}
 		}
 	}
@@ -399,7 +394,7 @@ namespace skins::knifes
 
 				if (g_Configurations.misc_knifemodel == 0)
 					return;
-
+				
 				const auto override_model = knives[chosenknife].model_name;
 
 				auto& sequence = data->m_Value.m_Int;

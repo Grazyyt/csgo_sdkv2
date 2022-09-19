@@ -42,6 +42,8 @@ namespace Hooks
 	inline vfunc_hook		gameevents_vhook;
 	inline vfunc_hook		netchannel_vhook;
 	inline RecvPropHook*	sequence_vhook;
+	inline void*			ParticleCollectionSimulateAdr;
+	inline PVOID			oParticleCollectionSimulate;
 
 
 	typedef bool(__thiscall* sendnetmsg_fn)(void*, INetMessage* msg, bool reliable, bool voice);
@@ -62,4 +64,5 @@ namespace Hooks
 	bool __fastcall hkSendNetMsg(void* ecx, void* edx, INetMessage* msg, bool reliable, bool voice);
 	bool __stdcall hkFireEvent(IGameEvent* pEvent);
 	void hkRecvProxy(const CRecvProxyData* pData, void* entity, void* output);
+	void __fastcall hkParticleCollectionSimulate(CParticleCollection* thisPtr, void* edx);
 }

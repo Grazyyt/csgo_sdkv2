@@ -6723,6 +6723,56 @@ void ImGui::SetTooltip(const char* fmt, ...)
     va_end(args);
 }
 
+void ImGui::Tooltip(const char* fmt, ...)
+{
+    if (IsItemHovered(0))
+    {
+        va_list args;
+        va_start(args, fmt);
+        SetTooltipV(fmt, args);
+        va_end(args);
+    }
+}
+
+bool ImGui::ItemsToolTipBegin(const char* name, int button)
+{
+    ImGui::SetNextWindowSize(ImVec2(250, 0));
+
+    OpenPopupOnItemClick(name, button);
+
+    if (!BeginPopup(name))
+        return false;
+
+    ImGuiContext& g = *GImGui;
+    ImGuiColorEditFlags opts = g.ColorEditOptions;
+
+    return true;
+}
+
+bool ImGui::ItemsToolTipBeginKeyBind(const char* name, bool hover)
+{
+    ImGui::SetNextWindowSize(ImVec2(90, 80));
+
+    OpenPopupOnItemClickKeyBind(name, hover);
+
+    if (!BeginPopup(name))
+        return false;
+
+    ImGuiContext& g = *GImGui;
+    ImGuiColorEditFlags opts = g.ColorEditOptions;
+
+    return true;
+}
+
+void ImGui::ItemsToolTipEnd()
+{
+    ImGuiContext& g = *GImGui;
+    ImGuiColorEditFlags opts = g.ColorEditOptions;
+
+    g.ColorEditOptions = opts;
+    EndPopup();
+}
+
 //-----------------------------------------------------------------------------
 // [SECTION] POPUPS
 //-----------------------------------------------------------------------------
@@ -6805,6 +6855,19 @@ bool ImGui::OpenPopupOnItemClick(const char* str_id, int mouse_button)
 {
     ImGuiWindow* window = GImGui->CurrentWindow;
     if (IsMouseReleased(mouse_button) && IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
+    {
+        ImGuiID id = str_id ? window->GetID(str_id) : window->DC.LastItemId; // If user hasn't passed an ID, we can use the LastItemID. Using LastItemID as a Popup ID won't conflict!
+        IM_ASSERT(id != 0);                                                  // You cannot pass a NULL str_id if the last item has no identifier (e.g. a Text() item)
+        OpenPopupEx(id);
+        return true;
+    }
+    return false;
+}
+
+bool ImGui::OpenPopupOnItemClickKeyBind(const char* str_id, bool hovered, int mouse_button)
+{
+    ImGuiWindow* window = GImGui->CurrentWindow;
+    if (IsMouseDown(mouse_button) && hovered)
     {
         ImGuiID id = str_id ? window->GetID(str_id) : window->DC.LastItemId; // If user hasn't passed an ID, we can use the LastItemID. Using LastItemID as a Popup ID won't conflict!
         IM_ASSERT(id != 0);                                                  // You cannot pass a NULL str_id if the last item has no identifier (e.g. a Text() item)

@@ -16,6 +16,8 @@
 #include "functions/backtrack.hpp"
 #include "functions/knifechanger.hpp"
 #include "helpers/eventlistener.h"
+#include "minhook/minhook.h"
+#include "helpers/fnv.hpp"
 
 #pragma intrinsic(_ReturnAddress)
 
@@ -60,6 +62,11 @@ namespace Hooks
 		sequence_vhook = new RecvPropHook(C_BaseViewModel::m_nSequence(), hkRecvProxy);
 
 		anti_cheat_fix();
+
+		MH_Initialize();
+		ParticleCollectionSimulateAdr = (void*)Utils::Rel2Abs<decltype(ParticleCollectionSimulateAdr)>((Utils::PatternScan(GetModuleHandleA("client.dll"), "E8 ? ? ? ? 8B 0E 83 C1 10") + 1));
+		MH_CreateHook(ParticleCollectionSimulateAdr, hkParticleCollectionSimulate, &oParticleCollectionSimulate);
+		MH_EnableHook(ParticleCollectionSimulateAdr);
 	}
 
 	void Shutdown()
@@ -77,6 +84,8 @@ namespace Hooks
 		g_CustomEventsManager.Unload();
 
 		Glow::Get().Shutdown();
+
+		MH_Uninitialize();
 	}
 
 	long __stdcall hkEndScene(IDirect3DDevice9* pDevice)
@@ -162,6 +171,7 @@ namespace Hooks
 		auto cmd = g_Input->GetUserCmd(sequence_number);
 		auto verified = g_Input->GetVerifiedCmd(sequence_number);
 		auto flags = g_LocalPlayer->m_fFlags();
+		float z_velocity = floor(g_LocalPlayer->m_vecVelocity().z);
 
 		if (!cmd || !cmd->command_number)
 			return;
@@ -394,7 +404,7 @@ namespace Hooks
 			auto attacker = (C_BasePlayer*)g_EntityList->GetClientEntity(g_EngineClient->GetPlayerForUserID(pEvent->GetInt("attacker")));
 			if (attacker && attacker->EntIndex() == g_EngineClient->GetLocalPlayer())
 			{
-				if (Events::Get().IsKnifeString(pEvent->GetString("weapon")))
+				if (Events::Get().IsKnifeString(pEvent->GetString("weapon")) && g_Configurations.misc_knifemodel != 0)
 				{
 					pEvent->SetString("weapon", skins::knifes::UpdateKillIcons());
 				}
@@ -414,5 +424,127 @@ namespace Hooks
 		
 
 		original_fn(pData, entity, output);
+	}
+	void __fastcall hkParticleCollectionSimulate(CParticleCollection* thisPtr, void* edx)
+	{
+
+		static auto original = reinterpret_cast<bool(__thiscall*)(CParticleCollection * thisPtr)>(oParticleCollectionSimulate);
+
+		if (!g_Configurations.misc_editparticle || !g_EngineClient->IsConnected()|| g_Unload)
+		{
+			original(thisPtr);
+			return;
+		}
+
+		original(thisPtr);
+
+		
+		CParticleCollection* root_colection = thisPtr;
+		while (root_colection->m_pParent)
+			root_colection = root_colection->m_pParent;
+
+		const char* root_name = root_colection->m_pDef.m_pObject->m_Name.buffer;
+
+		switch (fnv::hash(root_name))
+		{
+		case fnv::hash("molotov_groundfire"):
+		case fnv::hash("molotov_groundfire_00MEDIUM"):
+		case fnv::hash("molotov_groundfire_00HIGH"):
+		case fnv::hash("molotov_groundfire_fallback"):
+		case fnv::hash("molotov_groundfire_fallback2"):
+		case fnv::hash("molotov_explosion"):
+		case fnv::hash("explosion_molotov_air"):
+		case fnv::hash("extinguish_fire"):
+		case fnv::hash("weapon_molotov_held"):
+		case fnv::hash("weapon_molotov_fp"):
+		case fnv::hash("weapon_molotov_thrown"):
+		case fnv::hash("incgrenade_thrown_trail"):
+			switch (fnv::hash(thisPtr->m_pDef.m_pObject->m_Name.buffer))
+			{
+			case fnv::hash("explosion_molotov_air_smoke"):
+			case fnv::hash("molotov_smoking_ground_child01"):
+			case fnv::hash("molotov_smoking_ground_child02"):
+			case fnv::hash("molotov_smoking_ground_child02_cheapo"):
+			case fnv::hash("molotov_smoking_ground_child03"):
+			case fnv::hash("molotov_smoking_ground_child03_cheapo"):
+			case fnv::hash("molotov_smoke_screen"):
+				if (g_Configurations.misc_changemolotov_nosmoke) {
+					for (int i = 0; i < thisPtr->m_nActiveParticles; i++)
+					{
+						float* pColor = thisPtr->m_ParticleAttributes.FloatAttributePtr(PARTICLE_ATTRIBUTE_ALPHA, i);
+						*pColor = 0.f;
+					}
+				}
+				break;
+			default:
+				for (int i = 0; i < thisPtr->m_nActiveParticles; i++)
+				{
+					float* pColor = thisPtr->m_ParticleAttributes.FloatAttributePtr(PARTICLE_ATTRIBUTE_TINT_RGB, i);
+					float* aColor = thisPtr->m_ParticleAttributes.FloatAttributePtr(PARTICLE_ATTRIBUTE_ALPHA, i);
+					pColor[0] = (g_Configurations.misc_changemolotov_color[0]);
+					pColor[4] = (g_Configurations.misc_changemolotov_color[1]);
+					pColor[8] = (g_Configurations.misc_changemolotov_color[2]);
+					*aColor = (g_Configurations.misc_changemolotov_color[3]);
+				}
+				break;
+			}
+			break;
+		}
+
+		switch (fnv::hash(root_name))
+		{
+			case fnv::hash("blood_impact_light"):
+			case fnv::hash("blood_impact_medium"):
+			case fnv::hash("blood_impact_heavy"):
+			case fnv::hash("blood_impact_light_headshot"):
+			for (int i = 0; i < thisPtr->m_nActiveParticles; i++)
+			{
+				float* pColor = thisPtr->m_ParticleAttributes.FloatAttributePtr(PARTICLE_ATTRIBUTE_TINT_RGB, i);
+				float* aColor = thisPtr->m_ParticleAttributes.FloatAttributePtr(PARTICLE_ATTRIBUTE_ALPHA, i);
+				pColor[0] = (g_Configurations.misc_changeblood_color[0]);
+				pColor[4] = (g_Configurations.misc_changeblood_color[1]);
+				pColor[8] = (g_Configurations.misc_changeblood_color[2]);
+				*aColor = (g_Configurations.misc_changeblood_color[3]);
+			}
+		break;
+		}
+		
+		switch (fnv::hash(root_name))
+		{
+			case fnv::hash("explosion_smokegrenade"):
+			case fnv::hash("explosion_smokegrenade_fallback"):
+				for (int i = 0; i < thisPtr->m_nActiveParticles; i++)
+			{
+				float* pColor = thisPtr->m_ParticleAttributes.FloatAttributePtr(PARTICLE_ATTRIBUTE_TINT_RGB, i);
+				float* aColor = thisPtr->m_ParticleAttributes.FloatAttributePtr(PARTICLE_ATTRIBUTE_ALPHA, i);
+				pColor[0] = (g_Configurations.misc_changesmoke_color[0]);
+				pColor[4] = (g_Configurations.misc_changesmoke_color[1]);
+				pColor[8] = (g_Configurations.misc_changesmoke_color[2]);
+				*aColor = (g_Configurations.misc_changesmoke_color[3]);
+			}
+		break;
+		}
+
+		switch (fnv::hash(root_name))
+		{
+		case fnv::hash("explosion_hegrenade_brief"):
+		case fnv::hash("explosion_hegrenade_dirt"):
+		case fnv::hash("explosion_hegrenade_dirt_fallback"):
+		case fnv::hash("explosion_hegrenade_dirt_fallback2"):
+		case fnv::hash("explosion_hegrenade_interior"):
+		case fnv::hash("explosion_hegrenade_interior_fallback"):
+		case fnv::hash("explosion_basic"):
+		case fnv::hash("explosion_smoke_disperse"):
+			for (int i = 0; i < thisPtr->m_nActiveParticles; i++)
+			{
+				float* pColor = thisPtr->m_ParticleAttributes.FloatAttributePtr(PARTICLE_ATTRIBUTE_TINT_RGB, i);
+				float* aColor = thisPtr->m_ParticleAttributes.FloatAttributePtr(PARTICLE_ATTRIBUTE_ALPHA, i);
+				pColor[0] = (g_Configurations.misc_changegrenade_color[0]);
+				pColor[4] = (g_Configurations.misc_changegrenade_color[1]);
+				pColor[8] = (g_Configurations.misc_changegrenade_color[2]);
+				*aColor = (g_Configurations.misc_changegrenade_color[3]);
+			}
+			break;
+		}
 	}
 }

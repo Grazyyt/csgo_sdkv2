@@ -40,4 +40,9 @@ namespace Utils
         static auto pFindHudElement = reinterpret_cast<DWORD(__thiscall*)(void*, const char*)>(PatternScan(GetModuleHandleA("client.dll"), "55 8B EC 53 8B 5D 08 56 57 8B F9 33 F6 39 77 28"));
         return reinterpret_cast<T*>(pFindHudElement(pThis, name));
     }
+    template <typename T>
+    static constexpr auto Rel2Abs(uint8_t* address) noexcept
+    {
+        return (T)(address + 4 + *reinterpret_cast<std::int32_t*>(address));
+    }
 }

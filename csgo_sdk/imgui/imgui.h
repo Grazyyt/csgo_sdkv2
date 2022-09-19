@@ -529,7 +529,12 @@ namespace ImGui
     IMGUI_API void          BeginTooltip();                                                     // begin/append a tooltip window. to create full-featured tooltip (with any kind of items).
     IMGUI_API void          EndTooltip();
     IMGUI_API void          SetTooltip(const char* fmt, ...) IM_FMTARGS(1);                     // set a text-only tooltip, typically use with ImGui::IsItemHovered(). overidde any previous call to SetTooltip().
+    IMGUI_API void          Tooltip(const char* fmt, ...) IM_FMTARGS(1);
     IMGUI_API void          SetTooltipV(const char* fmt, va_list args) IM_FMTLIST(1);
+
+    IMGUI_API bool          ItemsToolTipBegin(const char* name, int button = 1);
+    IMGUI_API bool          ItemsToolTipBeginKeyBind(const char* name, bool hover = false);
+    IMGUI_API void          ItemsToolTipEnd();
 
     // Popups, Modals
     // The properties of popups windows are:
@@ -547,6 +552,7 @@ namespace ImGui
     IMGUI_API bool          BeginPopupModal(const char* name, bool* p_open = NULL, ImGuiWindowFlags flags = 0);                     // modal dialog (regular window with title bar, block interactions behind the modal window, can't close the modal window by clicking outside)
     IMGUI_API void          EndPopup();                                                                                             // only call EndPopup() if BeginPopupXXX() returns true!
     IMGUI_API bool          OpenPopupOnItemClick(const char* str_id = NULL, int mouse_button = 1);                                  // helper to open popup when clicked on last item (note: actually triggers on the mouse _released_ event to be consistent with popup behaviors). return true when just opened.
+    IMGUI_API bool          OpenPopupOnItemClickKeyBind(const char* str_id = NULL, bool hovered = false, int mouse_button = 1);
     IMGUI_API bool          IsPopupOpen(const char* str_id);                                    // return true if the popup is open at the current begin-ed level of the popup stack.
     IMGUI_API void          CloseCurrentPopup();                                                // close the popup we have begin-ed into. clicking on a MenuItem or Selectable automatically close the current popup.
 

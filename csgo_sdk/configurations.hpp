@@ -106,6 +106,8 @@ public:
 		CONFIGURATION(bool, glow_planted_c4, false);
 		CONFIGURATION(bool, glow_defuse_kits, false);
 		CONFIGURATION(bool, glow_weapons, false);
+		CONFIGURATION(int, glow_style, 0);
+		CONFIGURATION(bool, glow_fullbloom, false);
 
 		//
 		// CHAMS
@@ -158,6 +160,13 @@ public:
 		CONFIGURATION(int, misc_jumpbugkey, 0);
 
 		CONFIGURATION(int, misc_knifemodel, 0);
+		CONFIGURATION(int, misc_knifeskin, 0);
+
+		CONFIGURATION(bool, misc_editparticle, false);
+		CONFIGURATION(bool, misc_changemolotov_nosmoke, false);
+
+		//CONFIGURATION(bool, misc_edgebug, false);
+		//CONFIGURATION(int, misc_edgebugkey, 0);
 
 		// 
 		// COLORS
@@ -202,6 +211,10 @@ public:
 		float color_chams_weapon_occluded[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		float color_watermark[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float misc_changemolotov_color[4] = { 1.0f, 0.7f, 0.4f, 1.0f };
+		float misc_changeblood_color[4] = { 0.3f, 0.f, 0.f, 1.0f };
+		float misc_changesmoke_color[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
+		float misc_changegrenade_color[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
 };
 
 inline Configurations g_Configurations;

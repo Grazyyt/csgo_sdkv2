@@ -122,9 +122,11 @@ void CConfig::SetupVisuals()
 	SetupValue(g_Configurations.esp_player_health, false, "visuals", "visuals_esp_player_health");
 	SetupValue(g_Configurations.esp_player_armour, false, "visuals", "visuals_esp_player_armour");
 	SetupValue(g_Configurations.esp_player_weapons, false, "visuals", "visuals_esp_player_weapons");
+	SetupValue(g_Configurations.esp_player_weapons_type, 0, "visuals", "visuals_esp_player_weapons_type");
 	SetupValue(g_Configurations.esp_player_snaplines, false, "visuals", "visuals_esp_player_snaplines");
 	SetupValue(g_Configurations.esp_crosshair, false, "visuals", "visuals_esp_crosshair");
 	SetupValue(g_Configurations.esp_dropped_weapons, false, "visuals", "visuals_esp_dropped_weapons");
+	SetupValue(g_Configurations.esp_dropped_weapons_type, 0, "visuals", "visuals_esp_dropped_weapons_type");
 	SetupValue(g_Configurations.esp_defuse_kit, false, "visuals", "visuals_esp_defuse_kit");
 	SetupValue(g_Configurations.esp_planted_c4, false, "visuals", "visuals_esp_planted_c4");
 	SetupValue(g_Configurations.esp_items, false, "visuals", "visuals_esp_items");
@@ -139,6 +141,8 @@ void CConfig::SetupVisuals()
 	SetupValue(g_Configurations.glow_planted_c4, false, "visuals", "visuals_glow_planted_c4");
 	SetupValue(g_Configurations.glow_defuse_kits, false, "visuals", "visuals_glow_defuse_kits");
 	SetupValue(g_Configurations.glow_weapons, false, "visuals", "visuals_glow_weapons");
+	SetupValue(g_Configurations.glow_style, 0, "visuals", "visuals_glow_style");
+	SetupValue(g_Configurations.glow_fullbloom, false, "visuals", "visuals_glow_fullbloom");
 
 	SetupValue(g_Configurations.chams_player_enabled, false, "visuals", "visuals_chams_player_enabled");
 	SetupValue(g_Configurations.chams_player_enemies_only, false, "visuals", "visuals_chams_player_enemies_only");
@@ -170,6 +174,16 @@ void CConfig::SetupMisc()
 {
 	SetupValue(g_Configurations.misc_bhop, false, "miscellaneous", "miscellaneous_misc_bhop");
 	SetupValue(g_Configurations.misc_autostrafe, false, "miscellaneous", "miscellaneous_misc_autostrafe");
+	SetupValue(g_Configurations.misc_edgejump, false, "miscellaneous", "miscellaneous_misc_edgejump");
+	SetupValue(g_Configurations.misc_edgejumpkey, 0, "miscellaneous", "miscellaneous_misc_edgejumpkey");
+	SetupValue(g_Configurations.misc_jumpbug, false, "miscellaneous", "miscellaneous_misc_jumpbug");
+	SetupValue(g_Configurations.misc_jumpbugkey, 0, "miscellaneous", "miscellaneous_misc_jumpbugkey");
+	SetupValue(g_Configurations.misc_knifemodel, 0, "miscellaneous", "miscellaneous_misc_knifemmodel");
+	SetupValue(g_Configurations.misc_knifeskin, 0, "miscellaneous", "miscellaneous_misc_knifeskin");
+	SetupValue(g_Configurations.misc_nightmode, false, "miscellaneous", "miscellaneous_nightmode");
+	SetupValue(g_Configurations.misc_nightmode, false, "miscellaneous", "miscellaneous_nightmode");
+	SetupValue(g_Configurations.misc_changemolotov_nosmoke, false, "miscellaneous", "miscellaneous_misc_changemolotov_nosmoke");
+	SetupValue(g_Configurations.misc_editparticle, false, "miscellaneous", "miscellaneous_editparticle");
 	SetupValue(g_Configurations.misc_no_hands, false, "miscellaneous", "miscellaneous_misc_no_hands");
 	SetupValue(g_Configurations.misc_thirdperson, false, "miscellaneous", "miscellaneous_misc_thirdperson");
 	SetupValue(g_Configurations.misc_showranks, false, "miscellaneous", "miscellaneous_misc_showranks");
@@ -217,6 +231,14 @@ void CConfig::SetupColors()
 	SetupColor(g_Configurations.color_chams_weapon_occluded, "color_chams_weapon_occluded");
 
 	SetupColor(g_Configurations.color_watermark, "color_watermark");
+
+	SetupColor(g_Configurations.nightmode_color_prop, "color_nightmode_prop");
+	SetupColor(g_Configurations.nightmode_color_sky, "color_nightmode_sky");
+	SetupColor(g_Configurations.nightmode_color_world, "color_nightmode_world");
+
+	SetupColor(g_Configurations.misc_changeblood_color, "color_changeblood");
+	SetupColor(g_Configurations.misc_changemolotov_color, "color_changemolotov");
+	SetupColor(g_Configurations.misc_changesmoke_color, "color_changesmoke");
 }
 
 void CConfig::Setup() 

@@ -10,6 +10,7 @@
 #include "../sdk/utils/input.hpp"
 #include "../configurations.hpp"
 #include "../config.hpp"
+#include "../functions/knifechanger.hpp"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 
@@ -338,6 +339,8 @@ void RednerGlowTab()
         ImGui::Checkbox("Planted C4", &g_Configurations.glow_planted_c4);
         ImGui::Checkbox("Defuse Kits", &g_Configurations.glow_defuse_kits);
         ImGui::Checkbox("Weapons", &g_Configurations.glow_weapons);
+        ImGui::SliderInt("Glow Style", &g_Configurations.glow_style, 0, 3);
+        ImGui::Checkbox("Full Bloom", &g_Configurations.glow_fullbloom);
 
         ImGui::NextColumn();
 
@@ -467,6 +470,12 @@ void RenderMiscTab()
             ImGui::SameLine();
             ImGuiEx::Hotkey("##JBKeybind", &g_Configurations.misc_jumpbugkey, ImVec2(100, 20));
         }
+        /*ImGui::Checkbox("EdgeBug", &g_Configurations.misc_edgebug);
+        if (g_Configurations.misc_edgebug)
+        {
+            ImGui::SameLine();
+            ImGuiEx::Hotkey("##EBKeybind", &g_Configurations.misc_edgebugkey, ImVec2(100, 20));
+        }*/
 
         ImGui::Checkbox("No hands", &g_Configurations.misc_no_hands);
 		ImGui::Checkbox("Rank reveal", &g_Configurations.misc_showranks);
@@ -490,6 +499,30 @@ void RenderMiscTab()
         ImGui::SliderFloat("Blue", &g_Configurations.misc_mat_ambient_light_b, 0, 1);
         ImGui::Text("Knife Model:");
         ImGui::Combo("##knifemodel", &g_Configurations.misc_knifemodel, knifemodels, IM_ARRAYSIZE(knifemodels));
+        ImGui::InputInt("Paintkit ID", &g_Configurations.misc_knifeskin);
+        if (ImGui::ButtonEx("Update"))
+            skins::general::FullUpdate();
+        ImGui::Checkbox("Particle color editor", &g_Configurations.misc_editparticle);
+        if (g_Configurations.misc_editparticle)
+        {
+            ImGui::Text("Molotov");
+            if (ImGui::ItemsToolTipBegin("##molotovcolorchanger"))
+            {
+                ImGui::Checkbox("no smoke", &g_Configurations.misc_changemolotov_nosmoke);
+                ImGui::ItemsToolTipEnd();
+            }
+            ImGui::SameLine();
+            ImGui::ColorEdit4("Color##molotov", g_Configurations.misc_changemolotov_color);
+
+            ImGui::Text("Blood   ");
+            ImGui::SameLine();
+            ImGui::ColorEdit4("Color##blood", g_Configurations.misc_changeblood_color);
+
+            ImGui::Text("Smoke ");
+            ImGui::SameLine();
+            ImGui::ColorEdit4("Color##smoke", g_Configurations.misc_changesmoke_color);
+
+        }
 
         ImGui::Columns(1, nullptr, false);
     }

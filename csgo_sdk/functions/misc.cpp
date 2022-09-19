@@ -2,6 +2,7 @@
 #include "../configurations.hpp"
 #include "../sdk/utils/math.hpp"
 #include "../sdk/utils/input.hpp"
+#include "../functions/prediction.hpp"
 
 #include <algorithm>
 #include <Windows.h>

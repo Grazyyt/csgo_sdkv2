@@ -75,7 +75,7 @@ void Glow::Run()
                     continue;
 
                 color = is_enemy ? (Color)g_Configurations.color_glow_enemy : (Color)g_Configurations.color_glow_ally;
-
+               
                 break;
             }
             case ClassId_CChicken:
@@ -110,5 +110,7 @@ void Glow::Run()
         glowObject.m_flAlpha = color.a() / 255.0f;
         glowObject.m_bRenderWhenOccluded = true;
         glowObject.m_bRenderWhenUnoccluded = false;
+        glowObject.m_bFullBloomRender = g_Configurations.glow_fullbloom;
+        glowObject.m_nGlowStyle = g_Configurations.glow_style;
     }
 }
