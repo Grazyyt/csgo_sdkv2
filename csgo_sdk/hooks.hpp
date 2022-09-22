@@ -44,6 +44,7 @@ namespace Hooks
 	inline RecvPropHook*	sequence_vhook;
 	inline void*			ParticleCollectionSimulateAdr;
 	inline PVOID			oParticleCollectionSimulate;
+	inline bool				b_predicting;
 
 
 	typedef bool(__thiscall* sendnetmsg_fn)(void*, INetMessage* msg, bool reliable, bool voice);

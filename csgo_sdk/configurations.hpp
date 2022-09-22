@@ -159,14 +159,21 @@ public:
 		CONFIGURATION(bool, misc_jumpbug, false);
 		CONFIGURATION(int, misc_jumpbugkey, 0);
 
+		CONFIGURATION(bool, misc_edgebug, false);
+		CONFIGURATION(int, misc_edgebugkey, 0);
+
 		CONFIGURATION(int, misc_knifemodel, 0);
 		CONFIGURATION(int, misc_knifeskin, 0);
 
 		CONFIGURATION(bool, misc_editparticle, false);
 		CONFIGURATION(bool, misc_changemolotov_nosmoke, false);
 
-		//CONFIGURATION(bool, misc_edgebug, false);
-		//CONFIGURATION(int, misc_edgebugkey, 0);
+		CONFIGURATION(bool, misc_blockbot, false);
+		CONFIGURATION(int, misc_blockbotkey, 0);
+
+		CONFIGURATION(bool, misc_fakebackwards, false);
+		CONFIGURATION(int, misc_fakebackwardskey, 0);
+		CONFIGURATION(int, misc_fakebackwardsturnsmoothness, 5);
 
 		// 
 		// COLORS

@@ -14,7 +14,7 @@ class Misc : public Singleton<Misc>
 {
 public:
 	void AutoStrafe(CUserCmd* cmd);
-	void Bhop(CUserCmd* cmd);
-	void JumpBug(CUserCmd* cmd);
-	bool bhop2;
+	void PrePrediction(CUserCmd* cmd, int pre_flags);
+	void PostPrediction(CUserCmd* cmd, int pre_flags, int post_flags);
+	void FakeBackwards(CUserCmd* cmd);
 };

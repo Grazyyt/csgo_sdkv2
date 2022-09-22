@@ -172,15 +172,30 @@ namespace Hooks
 		auto verified = g_Input->GetVerifiedCmd(sequence_number);
 		auto flags = g_LocalPlayer->m_fFlags();
 		float z_velocity = floor(g_LocalPlayer->m_vecVelocity().z);
+		int max_choke_ticks = 0;
+		static int latency_ticks = 0;
+		float fl_latency = g_EngineClient->GetNetChannelInfo()->GetLatency(FLOW_OUTGOING);
+		int latency = TIME_TO_TICKS(fl_latency);
+		QAngle angleold = cmd->viewangles;
 
 		if (!cmd || !cmd->command_number)
 			return;
+
+		if (g_ClientState->m_nChokedCommands <= 0)
+			latency_ticks = latency;
+		else
+			latency_ticks = std::max(latency, latency_ticks);
+
+		if ((*g_GameRules)->IsValveDS())
+			if (fl_latency >= g_GlobalVars->interval_per_tick)
+				max_choke_ticks = 11 - latency_ticks;
+			else
+				max_choke_ticks = 11;
+		else
+			max_choke_ticks = 13 - latency_ticks;
 		
 		if (Menu::Get().IsVisible())
 			cmd->buttons &= ~IN_ATTACK;
-
-		if (g_Configurations.misc_bhop)
-			Misc::Get().Bhop(cmd);
 
 		if (g_Configurations.misc_autostrafe)
 			Misc::Get().AutoStrafe(cmd);
@@ -188,9 +203,16 @@ namespace Hooks
 		if (g_Configurations.misc_showranks && cmd->buttons & IN_SCORE)
 			g_CHLClient->DispatchUserMessage(CS_UM_ServerRankRevealAll, 0, 0, nullptr);
 
+		Misc::Get().FakeBackwards(cmd);
+		Math::FixMovement(cmd, angleold);
+
+		const auto pre_flags = g_LocalPlayer->m_fFlags();
+
+		Misc::Get().PrePrediction(cmd, pre_flags);
+
 		Engine_Prediction::Get().Begin(cmd);
 		{
-			Misc::Get().JumpBug(cmd);
+			bSendPacket = cmd->command_number % 2;
 			LegitBot::Get().OnMove(cmd);
 			Backtrack::Get().OnMove(cmd);
 
@@ -198,12 +220,15 @@ namespace Hooks
 				Grenade_Pred::Get().Trace(cmd);
 		}
 		Engine_Prediction::Get().End();
+		const auto post_flags = g_LocalPlayer->m_fFlags();
 
-		if (g_Configurations.misc_edgejump && InputSys::Get().IsKeyDown(g_Configurations.misc_edgejumpkey))
-		{
-			if (!(g_LocalPlayer->m_fFlags() & FL_ONGROUND) && (flags & FL_ONGROUND))
-				cmd->buttons |= IN_JUMP;
-		}
+		Misc::Get().PostPrediction(cmd, pre_flags, post_flags);
+
+		if (g_ClientState->m_nChokedCommands >= max_choke_ticks)
+			bSendPacket = true;
+
+		if (bSendPacket && g_LocalPlayer->IsAlive() && g_LocalPlayer->GetPlayerAnimState() != nullptr)
+			tpangle = cmd->viewangles;
 
 		verified->m_cmd = *cmd;
 		verified->m_crc = cmd->GetChecksum();
@@ -273,6 +298,15 @@ namespace Hooks
 			}
 		}
 
+		if (iEntIndex == g_EngineClient->GetLocalPlayer())
+		{
+			if (strstr(pSample, "land") && b_predicting)
+			{
+				b_predicting = false;
+				return;
+			}
+		}
+
 		ofunc(g_EngineSound, edx, filter, iEntIndex, iChannel, pSoundEntry, nSoundEntryHash, pSample, flVolume, nSeed, flAttenuation, iFlags, iPitch, pOrigin, pDirection, pUtlVecOrigins, bUpdatePositions, soundtime, speakerentity, unk);
 
 	}
@@ -295,6 +329,15 @@ namespace Hooks
 		{
 			if (g_EngineClient->IsInGame() && g_EngineClient->IsConnected())
 				skins::knifes::UpdateKnife();
+		}
+
+		if (stage == FRAME_RENDER_START)
+		{
+			if (g_Input->m_fCameraInThirdPerson)
+			{
+				*g_LocalPlayer->GetVAngles() = tpangle;
+				g_LocalPlayer->UpdateClientSideAnimation();
+			}
 		}
 
 		Visuals::Get().Nightmode();

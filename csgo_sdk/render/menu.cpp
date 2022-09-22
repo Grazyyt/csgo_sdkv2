@@ -470,12 +470,29 @@ void RenderMiscTab()
             ImGui::SameLine();
             ImGuiEx::Hotkey("##JBKeybind", &g_Configurations.misc_jumpbugkey, ImVec2(100, 20));
         }
-        /*ImGui::Checkbox("EdgeBug", &g_Configurations.misc_edgebug);
+        ImGui::Checkbox("EdgeBug", &g_Configurations.misc_edgebug);
         if (g_Configurations.misc_edgebug)
         {
             ImGui::SameLine();
             ImGuiEx::Hotkey("##EBKeybind", &g_Configurations.misc_edgebugkey, ImVec2(100, 20));
-        }*/
+        }
+        ImGui::Checkbox("Blockbot", &g_Configurations.misc_blockbot);
+        if (g_Configurations.misc_blockbot)
+        {
+            ImGui::SameLine();
+            ImGuiEx::Hotkey("##BBKeybind", &g_Configurations.misc_blockbotkey, ImVec2(100, 20));
+        }
+        ImGui::Checkbox("Fake Backwards", &g_Configurations.misc_fakebackwards);
+        if (ImGui::ItemsToolTipBegin("##molotovcolorchanger"))
+        {
+            ImGui::SliderInt("Turn Smoothness", &g_Configurations.misc_fakebackwardsturnsmoothness, 1, 20);
+            ImGui::ItemsToolTipEnd();
+        }
+        if (g_Configurations.misc_fakebackwards)
+        {
+            ImGui::SameLine();
+            ImGuiEx::Hotkey("##FBKeybind", &g_Configurations.misc_fakebackwardskey, ImVec2(100, 20));
+        }
 
         ImGui::Checkbox("No hands", &g_Configurations.misc_no_hands);
 		ImGui::Checkbox("Rank reveal", &g_Configurations.misc_showranks);

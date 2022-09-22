@@ -163,6 +163,7 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="minhook\minhook.h" />
     <ClInclude Include="render\directx render\dx_render.hpp" />
+    <ClInclude Include="sdk\interfaces\IGameRules.hpp" />
     <ClInclude Include="sdk\misc\datamap.hpp" />
     <ClInclude Include="fonts\droid.hpp" />
     <ClInclude Include="functions\chams.hpp" />

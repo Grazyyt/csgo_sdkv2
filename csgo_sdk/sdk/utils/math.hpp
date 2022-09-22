@@ -43,9 +43,15 @@ namespace Math
     void VectorAngles(const Vector& forward, QAngle& angles);
     bool WorldToScreen(const Vector& in, Vector& out);
 	float NormalizeYaw(float value);
+	void NormalizeAngles(Vector& angles);
+	void FixMovement(CUserCmd* cmd, QAngle& wishangle);
 	template < typename T >
 	T Clamp(T in, T low, T high) 
 	{
-		return min(max(in, low), high);
+		return std::min(std::max(in, low), high);
+	}
+	inline vec_t VectorLength(const Vector& v)
+	{
+		return (vec_t)FASTSQRT(v.x * v.x + v.y * v.y + v.z * v.z);
 	}
 }

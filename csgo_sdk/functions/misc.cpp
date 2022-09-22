@@ -3,6 +3,7 @@
 #include "../sdk/utils/math.hpp"
 #include "../sdk/utils/input.hpp"
 #include "../functions/prediction.hpp"
+#include "../hooks.hpp"
 
 #include <algorithm>
 #include <Windows.h>
@@ -134,140 +135,133 @@ void Misc::AutoStrafe(CUserCmd* cmd)
 	cmd->sidemove = sin(yaw) * speed;
 }
 
-void Misc::Bhop(CUserCmd* cmd)
+bool jumpbugged;
+
+void Misc::PrePrediction(CUserCmd* cmd, int pre_flags)
 {
-	static bool jumped_last_tick = false;
-	static bool should_fake_jump = false;
+	if (g_Configurations.misc_bhop)
+		if (!InputSys::Get().IsKeyDown(g_Configurations.misc_jumpbugkey) && g_LocalPlayer->m_nMoveType() != MOVETYPE_LADDER && g_LocalPlayer->m_nMoveType() != MOVETYPE_NOCLIP)
+			if (!(pre_flags & (FL_ONGROUND)) && cmd->buttons & (IN_JUMP) && !(pre_flags & (FL_INWATER)))
+				cmd->buttons &= ~(IN_JUMP);
 
-	if (!bhop2)
-		return;
+	if (InputSys::Get().IsKeyDown(g_Configurations.misc_blockbotkey) && g_LocalPlayer->IsAlive() && g_Configurations.misc_blockbot) {
 
-	if (!g_LocalPlayer)
-		return;
+		float bestdist = 250.f;
+		int index = -1;
 
-	if (!g_LocalPlayer->IsAlive())
-		return;
+		for (int i = 1; i < g_EngineClient->GetMaxClients(); i++) {
 
-	if (g_LocalPlayer->m_nMoveType() == MOVETYPE_LADDER || g_LocalPlayer->m_nMoveType() == MOVETYPE_NOCLIP)
-		return;
+			C_BasePlayer* entity = (C_BasePlayer*)g_EntityList->GetClientEntity(i);
 
-	if (g_LocalPlayer->m_fFlags() & FL_INWATER)
-		return;
+			if (!entity || !entity->IsAlive() || entity->IsDormant() || entity == g_LocalPlayer)
+				continue;
 
-	if (!jumped_last_tick && should_fake_jump)
-	{
-		should_fake_jump = false;
-		cmd->buttons |= IN_JUMP;
-	}
-	else if (cmd->buttons & IN_JUMP)
-	{
-		if (g_LocalPlayer->m_fFlags() & FL_ONGROUND)
-		{
-			jumped_last_tick = true;
-			should_fake_jump = true;
+			float dist = g_LocalPlayer->m_vecOrigin().DistTo(entity->m_vecOrigin());
+			if (dist < bestdist) {
+				bestdist = dist;
+				index = i;
+			}
 		}
-		else
-		{
-			cmd->buttons &= ~IN_JUMP;
-			jumped_last_tick = false;
+		if (index == -1)
+			return;
+		C_BasePlayer* target = (C_BasePlayer*)g_EntityList->GetClientEntity(index);
+		if (!target)
+			return;
+
+		Vector vecForward = target->GetAbsOrigin() - g_LocalPlayer->GetAbsOrigin();
+
+		Math::NormalizeAngles(vecForward);
+
+		auto wtf_sidemove = ((cos(DEG2RAD(cmd->viewangles.yaw)) * -vecForward.y) + (sin(DEG2RAD(cmd->viewangles.yaw)) * vecForward.x));
+		auto wtf_forwardmove = ((sin(DEG2RAD(cmd->viewangles.yaw)) * vecForward.y) + (cos(DEG2RAD(cmd->viewangles.yaw)) * vecForward.x));
+		if (g_LocalPlayer->m_vecOrigin().z > target->m_vecOrigin().z) {
+			cmd->sidemove = wtf_sidemove * 20;
+			cmd->forwardmove = wtf_forwardmove * 20;
 		}
-	}
-	else
-	{
-		jumped_last_tick = false;
-		should_fake_jump = false;
 	}
 }
-
-void Misc::JumpBug(CUserCmd* cmd)
+void Misc::PostPrediction(CUserCmd* cmd, int pre_flags, int post_flags)
 {
-	float max_radias = D3DX_PI * 2;
-	float step = max_radias / 128;
-	float xThick = 23;
-	if (g_Configurations.misc_jumpbug&& InputSys::Get().IsKeyDown(g_Configurations.misc_jumpbugkey)) {
-		if (g_LocalPlayer->m_fFlags() & FL_ONGROUND) {
-			bhop2 = false;
-			bool unduck = cmd->buttons &= ~IN_DUCK;
-			if (unduck) {
-				cmd->buttons &= ~IN_DUCK; // duck
-				cmd->buttons |= IN_JUMP; // jump
-				unduck = false;
+	if (g_Configurations.misc_jumpbug)
+	{
+		if (InputSys::Get().IsKeyDown(g_Configurations.misc_jumpbugkey))
+		{
+			Hooks::b_predicting = true;
+			if (!(pre_flags & (1 << 0)) && post_flags & (1 << 0))
+			{
+				cmd->buttons |= IN_DUCK;
 			}
-			Vector pos = g_LocalPlayer->GetAbsOrigin();
-			for (float a = 0.f; a < max_radias; a += step) {
-				Vector pt;
-				pt.x = (xThick * cos(a)) + pos.x;
-				pt.y = (xThick * sin(a)) + pos.y;
-				pt.z = pos.z;
 
-
-				Vector pt2 = pt;
-				pt2.z -= 8192;
-
-				trace_t fag;
-
-				Ray_t ray;
-				ray.Init(pt, pt2);
-
-				CTraceFilter flt;
-				flt.pSkip = g_LocalPlayer;
-				g_EngineTrace->TraceRay(ray, MASK_PLAYERSOLID, &flt, &fag);
-
-				if (fag.fraction != 1.f && fag.fraction != 0.f) {
-					cmd->buttons |= IN_DUCK; // duck
-					cmd->buttons &= ~IN_JUMP; // jump
-					unduck = true;
-				}
-			}
-			for (float a = 0.f; a < max_radias; a += step) {
-				Vector pt;
-				pt.x = ((xThick - 2.f) * cos(a)) + pos.x;
-				pt.y = ((xThick - 2.f) * sin(a)) + pos.y;
-				pt.z = pos.z;
-
-				Vector pt2 = pt;
-				pt2.z -= 8192;
-
-				trace_t fag;
-
-				Ray_t ray;
-				ray.Init(pt, pt2);
-
-				CTraceFilter flt;
-				flt.pSkip = g_LocalPlayer;
-				g_EngineTrace->TraceRay(ray, MASK_PLAYERSOLID, &flt, &fag);
-
-				if (fag.fraction != 1.f && fag.fraction != 0.f) {
-					cmd->buttons |= IN_DUCK; // duck
-					cmd->buttons &= ~IN_JUMP; // jump
-					unduck = true;
-				}
-			}
-			for (float a = 0.f; a < max_radias; a += step) {
-				Vector pt;
-				pt.x = ((xThick - 20.f) * cos(a)) + pos.x;
-				pt.y = ((xThick - 20.f) * sin(a)) + pos.y;
-				pt.z = pos.z;
-
-				Vector pt2 = pt;
-				pt2.z -= 8192;
-
-				trace_t fag;
-
-				Ray_t ray;
-				ray.Init(pt, pt2);
-
-				CTraceFilter flt;
-				flt.pSkip = g_LocalPlayer;
-				g_EngineTrace->TraceRay(ray, MASK_PLAYERSOLID, &flt, &fag);
-
-				if (fag.fraction != 1.f && fag.fraction != 0.f) {
-					cmd->buttons |= IN_DUCK; // duck
-					cmd->buttons &= ~IN_JUMP; // jump
-					unduck = true;
-				}
+			if (post_flags & FL_ONGROUND)
+			{
+				cmd->buttons &= ~IN_JUMP;
+				jumpbugged = true;
 			}
 		}
 	}
-	else bhop2 = true;
+
+
+	if (g_Configurations.misc_edgejump)
+	{
+		if (InputSys::Get().IsKeyDown(g_Configurations.misc_edgejumpkey))
+		{
+			if (pre_flags & (1 << 0) && !(post_flags & 1 << 0))
+			{
+				cmd->buttons |= IN_JUMP;
+			}
+		}
+	//	if (*config::get<bool>(crc("misc:lj")))
+	//	{
+	//		// kinda weird, dont know why we need a seperate check. Prob because of tickrate. anyways you could remove this check and make a lj on every jump feature :sunglasses:
+	//		if (input::hold(*config::get<int>(crc("misc:ej:key"))))
+	//		{
+	//			if (!(post_flags & 1 << 0))
+	//			{
+	//				cmd->buttons |= in_duck;
+	//			}
+	//		}
+	//	}
+	}
+
+	if (g_Configurations.misc_edgebug)
+	{
+		if (!(pre_flags & (1 << 0)) && post_flags & (1 << 0) && InputSys::Get().IsKeyDown(g_Configurations.misc_edgebugkey))
+		{
+			cmd->buttons |= (IN_DUCK);
+		}
+	}
+	////this is basically just the exact same as eb assist but you dont hold the key lOl
+	//if (*config::get<bool>(crc("misc:stathelper")))
+	//{
+	//	if (!(pre_flags & (1 << 0)) && post_flags & (1 << 0))
+	//	{
+	//		cmd->buttons |= (IN_DUCK);
+	//		cmd->buttons |= (IN_DUCK);
+	//	}
+	//}
+}
+
+void Misc::FakeBackwards(CUserCmd* cmd)
+{
+	static float yawfb = 0;
+	auto pWeapon = g_LocalPlayer->m_hActiveWeapon();
+
+	if (!g_EngineClient->IsInGame() || !g_EngineClient->IsConnected() || !g_LocalPlayer->IsAlive())
+		return;
+
+	if (g_Configurations.misc_fakebackwards && g_LocalPlayer->m_nMoveType() != MOVETYPE_LADDER && g_LocalPlayer->m_nMoveType() != MOVETYPE_NOCLIP && !(cmd->buttons & IN_USE)) {
+		if (yawfb != 180)
+			yawfb += g_Configurations.misc_fakebackwardsturnsmoothness; //5
+		cmd->viewangles.yaw += yawfb;	//set yaw to 180
+	}
+	else if (g_LocalPlayer->IsAlive() && g_LocalPlayer->m_nMoveType() != MOVETYPE_LADDER) {
+		if (yawfb != 0)
+			yawfb -= g_Configurations.misc_fakebackwardsturnsmoothness; //5
+		cmd->viewangles.yaw += yawfb; //set yaw to 0
+	}
+	else if (g_LocalPlayer->IsAlive() && g_LocalPlayer->m_nMoveType() == MOVETYPE_LADDER) {
+		if (yawfb != 0)
+			yawfb -= 180;
+		cmd->viewangles.yaw += yawfb;
+	}
 }

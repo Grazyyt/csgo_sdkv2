@@ -193,6 +193,13 @@ void CConfig::SetupMisc()
 	SetupValue(g_Configurations.misc_mat_ambient_light_r, 0.f, "miscellaneous", "miscellaneous_misc_mat_ambient_light_r");
 	SetupValue(g_Configurations.misc_mat_ambient_light_g, 0.f, "miscellaneous", "miscellaneous_misc_mat_ambient_light_g");
 	SetupValue(g_Configurations.misc_mat_ambient_light_b, 0.f, "miscellaneous", "miscellaneous_misc_mat_ambient_light_b");
+	SetupValue(g_Configurations.misc_edgebug, false, "miscellaneous", "miscellaneous_edgebug");
+	SetupValue(g_Configurations.misc_edgebugkey, 0, "miscellaneous", "miscellaneous_edgebugkey");
+	SetupValue(g_Configurations.misc_blockbot, false, "miscellaneous", "miscellaneous_blockbot");
+	SetupValue(g_Configurations.misc_blockbotkey, 0, "miscellaneous", "miscellaneous_blockbotkey");
+	SetupValue(g_Configurations.misc_fakebackwards, false, "miscellaneous", "miscellaneous_fakebackwards");
+	SetupValue(g_Configurations.misc_fakebackwardskey, 0, "miscellaneous", "miscellaneous_fakebackwardskey");
+	SetupValue(g_Configurations.misc_fakebackwardsturnsmoothness, 0, "miscellaneous", "miscellaneous_fakebackwardsturnsmoothness");
 }
 
 void CConfig::SetupColors() 

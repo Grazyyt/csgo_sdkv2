@@ -38,6 +38,7 @@
 #include "Interfaces/IPhysics.hpp"
 #include "Interfaces/IInputSystem.hpp"
 #include "interfaces/IRefCounted.hpp"
+#include "interfaces/IGameRules.hpp"
 
 #include "Misc/Convar.hpp"
 #include "Misc/CUserCmd.hpp"
@@ -86,7 +87,9 @@ inline CClientState*         g_ClientState    = nullptr;
 inline IPhysicsSurfaceProps* g_PhysSurface    = nullptr;
 inline IInputSystem*         g_InputSystem    = nullptr;
 inline IWeaponSystem*        g_WeaponSystem   = nullptr;
-inline INetMessage*          g_NetMessage    = nullptr;
+inline INetMessage*          g_NetMessage     = nullptr;
+inline CGameRules**          g_GameRules      = nullptr;
+inline QAngle                tpangle;
 
 template<typename... Args>
 void ConMsg(const char* pMsg, Args... args)
