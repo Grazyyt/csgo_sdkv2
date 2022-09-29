@@ -37,10 +37,6 @@ DWORD WINAPI OnDllAttach(LPVOID base)
 
         Hooks::Initialize();
 
-        InputSys::Get().RegisterHotkey(VK_DELETE, [base]() {
-            g_Unload = true;
-        });
-
         InputSys::Get().RegisterHotkey(VK_INSERT, [base]() {
             Menu::Get().Toggle();
         });

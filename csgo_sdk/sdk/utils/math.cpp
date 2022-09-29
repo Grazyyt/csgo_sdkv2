@@ -218,4 +218,18 @@ namespace Math
         wishangle = cmd->viewangles;
     }
     //--------------------------------------------------------------------------------
+    float NormalizeYawOsiris(float yaw)
+    {
+        if (!std::isfinite(yaw))
+            return 0.0f;
+
+        if (yaw >= -180.f && yaw <= 180.f)
+            return yaw;
+
+        const float rot = std::round(std::abs(yaw / 360.f));
+
+        yaw = (yaw < 0.f) ? yaw + (360.f * rot) : yaw - (360.f * rot);
+        return yaw;
+    }
+    //--------------------------------------------------------------------------------
 }

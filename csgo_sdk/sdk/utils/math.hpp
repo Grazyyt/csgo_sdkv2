@@ -54,4 +54,5 @@ namespace Math
 	{
 		return (vec_t)FASTSQRT(v.x * v.x + v.y * v.y + v.z * v.z);
 	}
+	float NormalizeYawOsiris(float yaw);
 }

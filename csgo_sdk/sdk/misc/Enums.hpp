@@ -1,5 +1,9 @@
 #pragma once
 
+#include <string>
+#include <vector>
+#include <array>
+
 enum ECstrike15UserMessages
 {
     CS_UM_VGUIMenu = 1,

@@ -15,6 +15,9 @@ public:
 
 	int bombsiteid;
 	bool bomb_defusing_with_kits = false;
+	bool PlantingSite;
+	bool Planting = false;
+	float PlantTime;
 
 	bool IsKnifeString(const char* str)
 	{

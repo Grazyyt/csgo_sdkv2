@@ -112,9 +112,6 @@ public:
 	NETVAR(CHandle<C_BasePlayer>, m_hBombDefuser, "DT_PlantedC4", "m_hBombDefuser");
 	NETVAR(int32_t, m_nBombSite, "DT_PlantedC4", "m_nBombSite");
 
-	NETVAR(Vector, bombsiteCenterA, "CCSPlayerResource", "m_bombsiteCenterA")
-	NETVAR(Vector, bombsiteCenterB, "CCSPlayerResource", "m_bombsiteCenterB")
-
 
 	const matrix3x4_t& m_rgflCoordinateFrame()
 	{
@@ -128,6 +125,28 @@ public:
 	bool IsPlantedC4();
 	bool IsDefuseKit();
 	//bool isSpotted();
+};
+
+class C_CSPlayerResource
+{
+private:
+
+	using int_65 = int[65];
+	using char6516 = char[65][16];
+	using str_32 = char[32];
+	using unsigned65 = unsigned[65];
+
+public:
+
+	NETVAR(int_65, m_iCompetitiveRanking, "DT_CSPlayerResource", "m_iCompetitiveRanking");
+	NETVAR(int_65, m_iCompetitiveWins, "DT_CSPlayerResource", "m_iCompetitiveWins");
+	NETVAR(int_65, m_nPersonaDataPublicLevel, "DT_CSPlayerResource", "m_nPersonaDataPublicLevel");
+	NETVAR(int_65, m_iCompTeammateColor, "DT_CSPlayerResource", "m_iCompTeammateColor");
+	NETVAR(char6516*, m_szClan, "DT_CSPlayerResource", "m_szClan");
+	NETVAR(unsigned65, m_nActiveCoinRank, "DT_CSPlayerResource", "m_nActiveCoinRank");
+	NETVAR(unsigned65, m_nMusicID, "DT_CSPlayerResource", "m_nMusicID");
+	NETVAR(Vector, m_bombsiteCenterA, "DT_CSPlayerResource", "m_bombsiteCenterA");
+	NETVAR(Vector, m_bombsiteCenterB, "DT_CSPlayerResource", "m_bombsiteCenterB");
 };
 
 class C_PlantedC4
@@ -428,4 +447,29 @@ public:
 	PNETVAR(int32_t, m_iPlayerVIP, "DT_CSPlayerResource", "m_iPlayerVIP");
 	PNETVAR(int32_t, m_iMVPs, "DT_CSPlayerResource", "m_iMVPs");
 	PNETVAR(int32_t, m_iScore, "DT_CSPlayerResource", "m_iScore");
+};
+
+class C_BaseHudChat
+{
+public:
+	enum ChatFilters
+	{
+		CHAT_FILTER_NONE = 0,
+		CHAT_FILTER_JOINLEAVE = 0x000001,
+		CHAT_FILTER_NAMECHANGE = 0x000002,
+		CHAT_FILTER_PUBLICCHAT = 0x000004,
+		CHAT_FILTER_SERVERMSG = 0x000008,
+		CHAT_FILTER_TEAMCHANGE = 0x000010,
+		CHAT_FILTER_ACHIEVEMENT = 0x000020,
+	};
+
+	void ChatPrintf(int iPlayerIndex, int iFilter, const char* fmt, ...)
+	{
+		char msg[1024];
+		va_list args;
+		va_start(args, fmt);
+		vsnprintf(msg, 1024, fmt, args);
+		CallVFunction<void(__cdecl*)(void*, int, int, const char*, ...)>(this, 27)(this, iPlayerIndex, iFilter, fmt);
+		va_end(args);
+	}
 };

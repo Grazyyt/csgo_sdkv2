@@ -45,6 +45,7 @@ public:
 	void ThirdPerson();
 	void DrawFOV();
 	void Nightmode();
+	void MotionBlur(CViewSetup* setup);
 public:
 	void AddToDrawList();
 	void Render();

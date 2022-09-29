@@ -37,8 +37,8 @@
 #include "Interfaces/CClientState.hpp"
 #include "Interfaces/IPhysics.hpp"
 #include "Interfaces/IInputSystem.hpp"
-#include "interfaces/IRefCounted.hpp"
-#include "interfaces/IGameRules.hpp"
+#include "Interfaces/IRefCounted.hpp"
+#include "Interfaces/IGameRules.hpp"
 
 #include "Misc/Convar.hpp"
 #include "Misc/CUserCmd.hpp"
@@ -122,4 +122,5 @@ private:
 };
 
 inline C_LocalPlayer g_LocalPlayer;
-
+class C_CSPlayerResource;
+inline C_CSPlayerResource** g_PlayerResource;

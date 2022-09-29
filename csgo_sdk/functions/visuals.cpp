@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <sstream>
 
 #include "visuals.hpp"
 #include "grenade_pred.hpp"
@@ -405,15 +406,18 @@ C_PlantedC4* GetBomb()
 
 void Visuals::RenderC4Window(C_BaseEntity* ent)
 {
-	if (!ent)
+	int x, y;
+	g_EngineClient->GetScreenSize(x, y);
+
+	if (Events::Get().Planting) {
+		float percentage = (std::abs(g_GlobalVars->curtime - Events::Get().PlantTime) * x) / 3.1f;
+		Render::Get().RenderBoxFilled(x / x, y / y, (int)percentage, 10, Color(255, 255, 255, 10));
+	}
+
+	if (!ent || !ent->IsPlantedC4())
 		return;
 
 	float bombTimer = ent->m_flC4Blow() - (g_LocalPlayer->m_nTickBase() * g_GlobalVars->interval_per_tick);
-
-	int x;
-	int y;
-
-	g_EngineClient->GetScreenSize(x, y);
 
 	int windowX = 0;
 	int windowY = y - 430;
@@ -422,7 +426,7 @@ void Visuals::RenderC4Window(C_BaseEntity* ent)
 	static int windowSizeY = 0;
 	const auto bomb = GetBomb();
 
-
+	
 
 	if (!bomb)
 		return;
@@ -434,10 +438,6 @@ void Visuals::RenderC4Window(C_BaseEntity* ent)
 		return;
 
 	int site = ent->m_nBombSite();
-
-	int w, h;
-
-	g_EngineClient->GetScreenSize(w, h);
 
 	std::string namemap = g_EngineClient->GetLevelNameShort();
 
@@ -477,7 +477,7 @@ void Visuals::RenderC4Window(C_BaseEntity* ent)
 	}
 
 
-	Render::Get().RenderText(ssffee.c_str(), w / w + 10, h / h + 10, 40, g_LocalPlayer->m_iTeamNum() == 3 ? Color(255, 50, 50, 255) : Color(50, 255, 50, 255));
+	Render::Get().RenderText(ssffee.c_str(), x / x + 10, y / y + 10, 40, g_LocalPlayer->m_iTeamNum() == 3 ? Color(255, 50, 50, 255) : Color(50, 255, 50, 255));
 
 	Render::Get().RenderBoxFilled(windowX, windowY, windowX + windowSizeX, windowY + windowSizeY, Color(0, 0, 0, 100));
 	Render::Get().RenderBoxFilled(windowX, windowY, windowX + 2, windowY + windowSizeY, Color(0, 0, 200, 100));
@@ -574,7 +574,7 @@ void Visuals::RenderC4Window(C_BaseEntity* ent)
 
 		float width;
 
-		if (g_Events.bomb_defusing_with_kits)
+		if (Events::Get().bomb_defusing_with_kits)
 		{
 			width = (((box_w * time) / 5.f));
 		}
@@ -605,15 +605,15 @@ void Visuals::RenderC4Window(C_BaseEntity* ent)
 	auto width = (((box_w * bombTimer) / ent->m_flTimerLength()));
 	Render::Get().RenderBoxFilled(windowX, windowY + windowSizeY, windowX + (int)width, windowY + windowSizeY + 5, yaint);
 
-	Render::Get().RenderCircleFilled(w / 2, y / 2 - 400, 40, 40, Color(50, 50, 50, 100));
-	Render::Get().RenderText("o", ImVec2(w / 2, y / 2 - 415), 30, Color(255, 255, 255, 200), true, true, g_IconEsp);
+	Render::Get().RenderCircleFilled(x / 2, y / 2 - 400, 40, 40, Color(50, 50, 50, 100));
+	Render::Get().RenderText("o", ImVec2(x / 2, y / 2 - 415), 30, Color(255, 255, 255, 200), true, true, g_IconEsp);
 
 	C_BasePlayer* Defuser = (C_BasePlayer*)C_BasePlayer::get_entity_from_handle(ent->m_hBombDefuser());
 
 	if (Defuser)
-		Render::Get().CircularProgressBar(w / 2, y / 2 - 400, 37, 40, 0, 360 * (DefuseTimeRemaining / (Defuser->m_bHasDefuser() ? 5 : 10)), yaint2, true);
+		Render::Get().CircularProgressBar(x / 2, y / 2 - 400, 37, 40, 0, 360 * (DefuseTimeRemaining / (Defuser->m_bHasDefuser() ? 5 : 10)), yaint2, true);
 	else
-		Render::Get().CircularProgressBar(w / 2, y / 2 - 400, 37, 40, 0, 360 * (bombTimer / ent->m_flTimerLength()), yaint, true);
+		Render::Get().CircularProgressBar(x / 2, y / 2 - 400, 37, 40, 0, 360 * (bombTimer / ent->m_flTimerLength()), yaint, true);
 
 }
 
@@ -809,6 +809,163 @@ void Visuals::Nightmode() {
 	}
 }
 
+struct MotionBlurHistory
+{
+	MotionBlurHistory()
+	{
+		lastTimeUpdate = 0.0f;
+		previousPitch = 0.0f;
+		previousYaw = 0.0f;
+		previousPositon = Vector{ 0.0f, 0.0f, 0.0f };
+		noRotationalMotionBlurUntil = 0.0f;
+	}
+
+	float lastTimeUpdate;
+	float previousPitch;
+	float previousYaw;
+	Vector previousPositon;
+	float noRotationalMotionBlurUntil;
+};
+
+/*void Visuals::MotionBlur(CViewSetup* setup)
+{
+	if (!g_LocalPlayer || !config->visuals.motionBlur.enabled)
+		return;
+
+	static MotionBlurHistory history;
+	static float motionBlurValues[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	if (setup)
+	{
+		const float timeElapsed = g_GlobalVars->realtime - history.lastTimeUpdate;
+
+		const auto viewangles = setup->angles;
+
+		const float currentPitch = Math::NormalizeYawOsiris(viewangles.x);
+		const float currentYaw = Math::NormalizeYawOsiris(viewangles.y);
+
+		Vector currentSideVector;
+		Vector currentForwardVector;
+		Vector currentUpVector;
+		Vector::fromAngleAll(setup->angles, &currentForwardVector, &currentSideVector, &currentUpVector);
+
+		Vector currentPosition = setup->origin;
+		Vector positionChange = history.previousPositon - currentPosition;
+
+		if ((positionChange.Length() > 30.0f) && (timeElapsed >= 0.5f))
+		{
+			motionBlurValues[0] = 0.0f;
+			motionBlurValues[1] = 0.0f;
+			motionBlurValues[2] = 0.0f;
+			motionBlurValues[3] = 0.0f;
+		}
+		else if (timeElapsed > (1.0f / 15.0f))
+		{
+			motionBlurValues[0] = 0.0f;
+			motionBlurValues[1] = 0.0f;
+			motionBlurValues[2] = 0.0f;
+			motionBlurValues[3] = 0.0f;
+		}
+		else if (positionChange.Length() > 50.0f)
+		{
+			history.noRotationalMotionBlurUntil = g_GlobalVars->realtime + 1.0f;
+		}
+		else
+		{
+			const float horizontalFov = setup->fov;
+			const float verticalFov = (setup->aspectRatio <= 0.0f) ? (setup->fov) : (setup->fov / setup->aspectratio);
+			const float viewdotMotion = currentForwardVector.dotProduct(positionChange);
+
+			if (config->visuals.motionBlur.forwardEnabled)
+				motionBlurValues[2] = viewdotMotion;
+
+			const float sidedotMotion = currentSideVector.dotProduct(positionChange);
+			float yawdiffOriginal = history.previousYaw - currentYaw;
+			if (((history.previousYaw - currentYaw > 180.0f) || (history.previousYaw - currentYaw < -180.0f)) &&
+				((history.previousYaw + currentYaw > -180.0f) && (history.previousYaw + currentYaw < 180.0f)))
+				yawdiffOriginal = history.previousYaw + currentYaw;
+
+			float yawdiffAdjusted = yawdiffOriginal + (sidedotMotion / 3.0f);
+
+			if (yawdiffOriginal < 0.0f)
+				yawdiffAdjusted = std::clamp(yawdiffAdjusted, yawdiffOriginal, 0.0f);
+			else
+				yawdiffAdjusted = std::clamp(yawdiffAdjusted, 0.0f, yawdiffOriginal);
+
+			const float undampenedYaw = yawdiffAdjusted / horizontalFov;
+			motionBlurValues[0] = undampenedYaw * (1.0f - (fabsf(currentPitch) / 90.0f));
+
+			const float pitchCompensateMask = 1.0f - ((1.0f - fabsf(currentForwardVector[2])) * (1.0f - fabsf(currentForwardVector[2])));
+			const float pitchdiffOriginal = history.previousPitch - currentPitch;
+			float pitchdiffAdjusted = pitchdiffOriginal;
+
+			if (currentPitch > 0.0f)
+				pitchdiffAdjusted = pitchdiffOriginal - ((viewdotMotion / 2.0f) * pitchCompensateMask);
+			else
+				pitchdiffAdjusted = pitchdiffOriginal + ((viewdotMotion / 2.0f) * pitchCompensateMask);
+
+
+			if (pitchdiffOriginal < 0.0f)
+				pitchdiffAdjusted = std::clamp(pitchdiffAdjusted, pitchdiffOriginal, 0.0f);
+			else
+				pitchdiffAdjusted = std::clamp(pitchdiffAdjusted, 0.0f, pitchdiffOriginal);
+
+			motionBlurValues[1] = pitchdiffAdjusted / verticalFov;
+			motionBlurValues[3] = undampenedYaw;
+			motionBlurValues[3] *= (fabs(currentPitch) / 90.0f) * (fabs(currentPitch) / 90.0f) * (fabs(currentPitch) / 90.0f);
+
+			if (timeElapsed > 0.0f)
+				motionBlurValues[2] /= timeElapsed * 30.0f;
+			else
+				motionBlurValues[2] = 0.0f;
+
+			motionBlurValues[2] = std::clamp((fabsf(motionBlurValues[2]) - config->visuals.motionBlur.fallingMin) / (config->visuals.motionBlur.fallingMax - config->visuals.motionBlur.fallingMin), 0.0f, 1.0f) * (motionBlurValues[2] >= 0.0f ? 1.0f : -1.0f);
+			motionBlurValues[2] /= 30.0f;
+			motionBlurValues[0] *= config->visuals.motionBlur.rotationIntensity * .15f * config->visuals.motionBlur.strength;
+			motionBlurValues[1] *= config->visuals.motionBlur.rotationIntensity * .15f * config->visuals.motionBlur.strength;
+			motionBlurValues[2] *= config->visuals.motionBlur.rotationIntensity * .15f * config->visuals.motionBlur.strength;
+			motionBlurValues[3] *= config->visuals.motionBlur.fallingIntensity * .15f * config->visuals.motionBlur.strength;
+
+		}
+
+		if (memory->globalVars->realtime < history.noRotationalMotionBlurUntil)
+		{
+			motionBlurValues[0] = 0.0f;
+			motionBlurValues[1] = 0.0f;
+			motionBlurValues[3] = 0.0f;
+		}
+		else
+		{
+			history.noRotationalMotionBlurUntil = 0.0f;
+		}
+		history.previousPositon = currentPosition;
+
+		history.previousPitch = currentPitch;
+		history.previousYaw = currentYaw;
+		history.lastTimeUpdate = memory->globalVars->realtime;
+		return;
+	}
+
+	const auto material = interfaces->materialSystem->findMaterial("dev/motion_blur", "RenderTargets", false);
+	if (!material)
+		return;
+
+	const auto MotionBlurInternal = material->findVar("$MotionBlurInternal", nullptr, false);
+
+	MotionBlurInternal->setVecComponentValue(motionBlurValues[0], 0);
+	MotionBlurInternal->setVecComponentValue(motionBlurValues[1], 1);
+	MotionBlurInternal->setVecComponentValue(motionBlurValues[2], 2);
+	MotionBlurInternal->setVecComponentValue(motionBlurValues[3], 3);
+
+	const auto MotionBlurViewPortInternal = material->findVar("$MotionBlurViewportInternal", nullptr, false);
+
+	MotionBlurViewPortInternal->setVecComponentValue(0.0f, 0);
+	MotionBlurViewPortInternal->setVecComponentValue(0.0f, 1);
+	MotionBlurViewPortInternal->setVecComponentValue(1.0f, 2);
+	MotionBlurViewPortInternal->setVecComponentValue(1.0f, 3);
+
+	DRAW_SCREEN_EFFECT(material)
+}*/
+
 void Visuals::AddToDrawList() 
 {
 	if (g_Configurations.esp_grenade_prediction)
@@ -847,7 +1004,7 @@ void Visuals::AddToDrawList()
 			RenderWeapon(static_cast<C_BaseCombatWeapon*>(entity));
 		else if (g_Configurations.esp_dropped_weapons && entity->IsDefuseKit())
 			RenderDefuseKit(entity);
-		else if (entity->IsPlantedC4() && g_Configurations.esp_planted_c4)
+		else if (g_Configurations.esp_planted_c4)
 			RenderC4Window(entity);
 		else if (entity->IsLoot() && g_Configurations.esp_items)
 			RenderItemEsp(entity);

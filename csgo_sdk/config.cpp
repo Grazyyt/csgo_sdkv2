@@ -180,7 +180,7 @@ void CConfig::SetupMisc()
 	SetupValue(g_Configurations.misc_jumpbugkey, 0, "miscellaneous", "miscellaneous_misc_jumpbugkey");
 	SetupValue(g_Configurations.misc_knifemodel, 0, "miscellaneous", "miscellaneous_misc_knifemmodel");
 	SetupValue(g_Configurations.misc_knifeskin, 0, "miscellaneous", "miscellaneous_misc_knifeskin");
-	SetupValue(g_Configurations.misc_nightmode, false, "miscellaneous", "miscellaneous_nightmode");
+	SetupValue(g_Configurations.misc_no_fog, false, "miscellaneous", "miscellaneous_nofog");
 	SetupValue(g_Configurations.misc_nightmode, false, "miscellaneous", "miscellaneous_nightmode");
 	SetupValue(g_Configurations.misc_changemolotov_nosmoke, false, "miscellaneous", "miscellaneous_misc_changemolotov_nosmoke");
 	SetupValue(g_Configurations.misc_editparticle, false, "miscellaneous", "miscellaneous_editparticle");

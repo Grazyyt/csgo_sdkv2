@@ -141,7 +141,7 @@ void Misc::PrePrediction(CUserCmd* cmd, int pre_flags)
 {
 	if (g_Configurations.misc_bhop)
 		if (!InputSys::Get().IsKeyDown(g_Configurations.misc_jumpbugkey) && g_LocalPlayer->m_nMoveType() != MOVETYPE_LADDER && g_LocalPlayer->m_nMoveType() != MOVETYPE_NOCLIP)
-			if (!(pre_flags & (FL_ONGROUND)) && cmd->buttons & (IN_JUMP) && !(pre_flags & (FL_INWATER)))
+			if (!(pre_flags & (FL_ONGROUND)) && cmd->buttons & (IN_JUMP))
 				cmd->buttons &= ~(IN_JUMP);
 
 	if (InputSys::Get().IsKeyDown(g_Configurations.misc_blockbotkey) && g_LocalPlayer->IsAlive() && g_Configurations.misc_blockbot) {

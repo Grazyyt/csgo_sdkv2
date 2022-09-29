@@ -27,9 +27,11 @@ class EventsManager
 			g_GameEvents->AddListener(this, "inferno_expire", false);
 			g_GameEvents->AddListener(this, "game_newmap", false);
 			g_GameEvents->AddListener(this, "bomb_beginplant", false);
+			g_GameEvents->AddListener(this, "bomb_abortplant", false);
 			g_GameEvents->AddListener(this, "bomb_planted", false);
 			g_GameEvents->AddListener(this, "bomb_begindefuse", false);
 			g_GameEvents->AddListener(this, "cs_game_disconnected", false);
+			g_GameEvents->AddListener(this, "round_end", false);
 		}
 		void Stop() {
 			g_GameEvents->RemoveListener(this);

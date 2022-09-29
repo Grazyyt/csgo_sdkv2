@@ -506,6 +506,9 @@ void RenderMiscTab()
             ImGui::ColorEdit3("Color Sky", g_Configurations.nightmode_color_sky);
         }
 
+        if (ImGui::Button("Unhook"))
+            g_Unload = true;
+
 		ImGui::NextColumn();
 
         ImGui::Text("Viewmodel:");
