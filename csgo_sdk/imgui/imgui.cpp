@@ -4377,8 +4377,15 @@ static bool ImGui::BeginChildEx(const char* name, ImGuiID id, const ImVec2& size
 
 bool ImGui::BeginChild(const char* str_id, const ImVec2& size_arg, bool border, ImGuiWindowFlags extra_flags)
 {
+    ImGuiContext& g = *GImGui;
     ImGuiWindow* window = GetCurrentWindow();
-    return BeginChildEx(str_id, window->GetID(str_id), size_arg, border, extra_flags);
+    bool ret = BeginChildEx(str_id, window->GetID(str_id), size_arg, border, extra_flags);
+
+    if (extra_flags & ImGuiWindowFlags_ChildWindowTitle || extra_flags & ImGuiWindowFlags_ListBoxWindowTitle)
+    {
+        ImGui::Dummy(ImVec2(0, 13.f));
+    }
+    return ret;
 }
 
 bool ImGui::BeginChild(ImGuiID id, const ImVec2& size_arg, bool border, ImGuiWindowFlags extra_flags)
@@ -4423,6 +4430,56 @@ void ImGui::EndChild()
             // Not navigable into
             ItemAdd(bb, 0);
         }
+    }
+}
+
+void ImGui::EndChild(const char* name)
+{
+    ImGuiContext& g = *GImGui;
+    ImGuiWindow* window = g.CurrentWindow;
+
+    IM_ASSERT(window->Flags & ImGuiWindowFlags_ChildWindow);   // Mismatched BeginChild()/EndChild() callss
+    if (window->BeginCount > 1)
+    {
+        End();
+    }
+    else
+    {
+        ImVec2 sz = window->Size;
+        if (window->AutoFitChildAxises & (1 << ImGuiAxis_X)) // Arbitrary minimum zero-ish child size of 4.0f causes less trouble than a 0.0f
+            sz.x = ImMax(4.0f, sz.x);
+        if (window->AutoFitChildAxises & (1 << ImGuiAxis_Y))
+            sz.y = ImMax(4.0f, sz.y);
+        End();
+
+        ImGuiWindow* parent_window = g.CurrentWindow;
+        ImRect bb(parent_window->DC.CursorPos, parent_window->DC.CursorPos + sz);
+        ItemSize(sz);
+        if ((window->DC.NavLayerActiveMask != 0 || window->DC.NavHasScroll) && !(window->Flags & ImGuiWindowFlags_NavFlattened))
+        {
+            ItemAdd(bb, window->ChildId);
+            RenderNavHighlight(bb, window->ChildId);
+
+            // When browsing a window that has no activable items (scroll only) we keep a highlight on the child
+            if (window->DC.NavLayerActiveMask == 0 && window == g.NavWindow)
+                RenderNavHighlight(ImRect(bb.Min - ImVec2(2, 2), bb.Max + ImVec2(2, 2)), g.NavId, ImGuiNavHighlightFlags_TypeThin);
+        }
+        else
+        {
+            // Not navigable into
+            ItemAdd(bb, 0);
+        }
+    }
+    ImVec2 name_size = CalcTextSize(name, FindRenderedTextEnd(name, NULL));
+    ImVec2 global_offset = ImVec2(0, name_size.y / 2);
+    const float shadow_size = 10.f;
+    ImVec4 Color = ImVec4(0.4f, 0.4f, 0.4f, 1.f);
+
+    if (window->Flags & ImGuiWindowFlags_ChildWindowTitle)
+    {
+        window->DrawList->AddRectFilled(window->Pos, ImVec2(window->Pos.x + window->Size.x, window->Pos.y + 18), GetColorU32(ImGuiCol_TitleBg), g.Style.FrameRounding, ImDrawCornerFlags_Top);
+        window->DrawList->AddRectFilled(window->Pos, ImVec2(window->Pos.x + window->Size.x, window->Pos.y + 4), GetColorU32(ImGuiCol_SliderGrab), g.Style.FrameRounding, ImDrawCornerFlags_Top);
+        window->DrawList->AddText(window->Pos + ImVec2(4, 4), GetColorU32(ImGuiCol_Text), name, FindRenderedTextEnd(name, NULL));
     }
 }
 

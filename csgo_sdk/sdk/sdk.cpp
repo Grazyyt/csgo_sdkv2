@@ -36,6 +36,7 @@ namespace Interfaces
         auto dataCacheFactory = get_module_factory(GetModuleHandleA("datacache.dll"));
         auto vphysicsFactory  = get_module_factory(GetModuleHandleA("vphysics.dll"));
         auto inputSysFactory  = get_module_factory(GetModuleHandleA("inputsystem.dll"));
+        auto fileSysFactory   = get_module_factory(GetModuleHandleA("filesystem_stdio.dll"));
         
         g_CHLClient           = get_interface<IBaseClientDLL>      (clientFactory   , "VClient018");
         g_EntityList          = get_interface<IClientEntityList>   (clientFactory   , "VClientEntityList003");
@@ -56,6 +57,7 @@ namespace Interfaces
         g_VGuiSurface         = get_interface<ISurface>            (vguiFactory     , "VGUI_Surface031");
         g_PhysSurface         = get_interface<IPhysicsSurfaceProps>(vphysicsFactory , "VPhysicsSurfaceProps001");
         g_InputSystem         = get_interface<IInputSystem>        (inputSysFactory , "InputSystemVersion001");
+        g_BaseFileSystem      = get_interface<IBaseFileSystem>     (fileSysFactory  , "VBaseFileSystem011");
 
         auto client = GetModuleHandleA("client.dll");
         auto engine = GetModuleHandleA("engine.dll");

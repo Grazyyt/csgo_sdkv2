@@ -1,7 +1,6 @@
 #include <map>
 #include "events.hpp"
 #include "../sdk/csgostructs.hpp"
-#include "../functions/knifechanger.hpp"
 
 void Events::BEvent(IGameEvent* event)
 {

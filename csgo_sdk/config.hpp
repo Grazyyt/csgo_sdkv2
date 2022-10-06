@@ -55,6 +55,7 @@ private:
 	void SetupVisuals();
 	void SetupMisc();
 	void SetupColors();
+	void SetupSkins();
 public:
 	void Setup();
 	void Load(const std::string& name);

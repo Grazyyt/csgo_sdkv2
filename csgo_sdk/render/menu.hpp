@@ -3,10 +3,11 @@
 #include <string>
 #include <vector>
 #include <time.h>
-
+#include "../imgui/imgui.h"
 #include "../sdk/utils/singleton.hpp"
 
-#include "../imgui/imgui.h"
+#include <D3dx9tex.h>
+#pragma comment (lib,"D3dx9.lib")
 
 struct IDirect3DDevice9;
 
@@ -25,7 +26,6 @@ public:
 
     bool IsVisible() const { return _visible; }
 
-private:
     void CreateStyle();
 
     ImGuiStyle        _style;
@@ -39,6 +39,7 @@ static char* sidebar_tabs[] =
     "CHAMS",
     "AIM",
     "MISC",
+    "SKINS",
     "CONFIG"
 };
 

@@ -248,6 +248,7 @@ namespace ImGui
     IMGUI_API bool          BeginChild(const char* str_id, const ImVec2& size = ImVec2(0,0), bool border = false, ImGuiWindowFlags flags = 0);
     IMGUI_API bool          BeginChild(ImGuiID id, const ImVec2& size = ImVec2(0,0), bool border = false, ImGuiWindowFlags flags = 0);
     IMGUI_API void          EndChild();
+    IMGUI_API void          EndChild(const char* name);
 
     // Windows Utilities
     // - "current window" = the window we are appending into while inside a Begin()/End() block. "next window" = next window we will Begin() into.
@@ -727,7 +728,11 @@ enum ImGuiWindowFlags_
     ImGuiWindowFlags_Tooltip                = 1 << 25,  // Don't use! For internal use by BeginTooltip()
     ImGuiWindowFlags_Popup                  = 1 << 26,  // Don't use! For internal use by BeginPopup()
     ImGuiWindowFlags_Modal                  = 1 << 27,  // Don't use! For internal use by BeginPopupModal()
-    ImGuiWindowFlags_ChildMenu              = 1 << 28   // Don't use! For internal use by BeginMenu()
+    ImGuiWindowFlags_ChildMenu              = 1 << 28,   // Don't use! For internal use by BeginMenu()
+    ImGuiWindowFlags_ChildWindowTitle       = 1 << 29,
+    ImGuiWindowFlags_ListBoxWindowTitle     = 1 << 30,
+    ImGuiWindowFlags_RainbowTitleBar        = 1 << 31,
+    ImGuiWindowFlags_NoSpaceAnyItems        = 1 << 32
 
     // [Obsolete]
     //ImGuiWindowFlags_ShowBorders          = 1 << 7,   // --> Set style.FrameBorderSize=1.0f / style.WindowBorderSize=1.0f to enable borders around windows and items

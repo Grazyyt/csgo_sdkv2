@@ -1,6 +1,7 @@
-#include "knifechanger.hpp"
+#include "sequence.hpp"
+#include "item_definitions.hpp"
 
-namespace skins::general
+namespace Sequence::general
 {
 	struct hud_weapons_t {
 		std::int32_t* GetWeaponCount() {
@@ -28,135 +29,8 @@ namespace skins::general
 	}
 }
 
-namespace skins::knifes
+namespace Sequence
 {
-	uintptr_t world_model_handle;
-	C_BaseViewModel* world_model;
-	std::unordered_map<int, const char*> viewmodel_cfg;
-
-	std::vector<knife_t> knives = {
-		{ 500, "models/weapons/v_knife_bayonet.mdl", "bayonet" },
-		{ 503, "models/weapons/v_knife_css.mdl", "knife_css" },
-		{ 505, "models/weapons/v_knife_flip.mdl", "knife_flip" },
-		{ 506, "models/weapons/v_knife_gut.mdl", "knife_gut" },
-		{ 507, "models/weapons/v_knife_karam.mdl", "knife_karambit" },
-		{ 508, "models/weapons/v_knife_m9_bay.mdl", "knife_m9_bayonet" },
-		{ 509, "models/weapons/v_knife_tactical.mdl", "knife_tactical"},
-		{ 512, "models/weapons/v_knife_falchion_advanced.mdl", "knife_falchion" },
-		{ 514, "models/weapons/v_knife_survival_bowie.mdl", "knife_survival_bowie" },
-		{ 515, "models/weapons/v_knife_butterfly.mdl", "knife_butterfly" },
-		{ 516, "models/weapons/v_knife_push.mdl", "knife_push"},
-		{ 517, "models/weapons/v_knife_cord.mdl", "knife_cord"},
-		{ 518, "models/weapons/v_knife_canis.mdl", "knife_canis"},
-		{ 519, "models/weapons/v_knife_ursus.mdl", "knife_ursus"},
-		{ 520, "models/weapons/v_knife_gypsy_jackknife.mdl", "knife_gypsy_jackknife"},
-		{ 521, "models/weapons/v_knife_outdoor.mdl", "knife_outdoor" },
-		{ 522, "models/weapons/v_knife_stiletto.mdl", "knife_stiletto" },
-		{ 523, "models/weapons/v_knife_widowmaker.mdl", "knife_widowmaker" },
-		{ 525, "models/weapons/v_knife_skeleton.mdl", "knife_skeleton" }
-	};
-
-	void UpdateKnife()
-	{
-		if (!g_LocalPlayer)
-			return;
-
-		const auto local_index = g_EngineClient->GetLocalPlayer();
-		player_info_t player_info;
-		if (!g_EngineClient->GetPlayerInfo(local_index, &player_info))
-			return;
-
-		auto weapons = g_LocalPlayer->m_hMyWeapons();
-		for (int i = 0; weapons[i].IsValid(); i++)
-		{
-			C_BaseCombatWeapon* weapon = (C_BaseCombatWeapon*)g_EntityList->GetClientEntityFromHandle(weapons[i]);
-			if (!weapon)
-				continue;
-
-			C_BaseAttributableItem* weapon_attributable = (C_BaseAttributableItem*)weapon;
-
-			world_model_handle = weapon_attributable->m_hWeaponWorldModel();
-
-			if (world_model_handle)
-				world_model = (C_BaseViewModel*)g_EntityList->GetClientEntity(world_model_handle);
-
-			if (weapon->IsKnife())
-			{
-				int chosen_knife = g_Configurations.misc_knifemodel - 1;
-				if (chosen_knife < 0)
-					return;
-
-				int model = g_MdlInfo->GetModelIndex(knives[chosen_knife].model_name);
-
-				weapon_attributable->m_Item().m_iItemDefinitionIndex() = knives[chosen_knife].item_definition_index;
-
-				if (g_LocalPlayer->m_hViewModel())
-				{
-					if (g_LocalPlayer->m_hActiveWeapon() && g_LocalPlayer->m_hActiveWeapon()->IsKnife())
-					{
-						g_LocalPlayer->m_hViewModel()->m_nModelIndex() = model;
-						g_LocalPlayer->m_hViewModel()->m_nViewModelIndex() = model;
-						g_LocalPlayer->m_hViewModel()->m_nSequence();
-					}
-				}
-
-				//((C_BaseViewModel*)weapon)->m_nModelIndex() = model;
-				//((C_BaseViewModel*)weapon)->m_nViewModelIndex() = model;
-
-				if (world_model)
-				{
-					world_model->m_nModelIndex() = model + 1;
-				}
-				weapon_attributable->m_nFallbackPaintKit() = g_Configurations.misc_knifeskin;
-				weapon_attributable->m_flFallbackWear() = 0.000000001f;
-				weapon_attributable->m_nFallbackSeed() = 0;
-				weapon_attributable->m_nFallbackStatTrak() = -1;
-				weapon_attributable->m_Item().m_iItemIDHigh() = -1;
-				weapon_attributable->m_Item().m_iEntityQuality() = 3;
-				weapon_attributable->m_Item().m_iAccountID() = player_info.xuid_low;
-			}
-		}
-	}
-
-	const char* UpdateKillIcons()
-	{
-		int chosen_knife = g_Configurations.misc_knifemodel - 1;
-		if (chosen_knife < 0)
-		{
-			return "";
-		}
-
-		return knives[chosen_knife].killfeed_name;
-	}
-
-	const std::map<size_t, weapon_info> k_weapon_info =
-	{
-		{WEAPON_KNIFE,{"models/weapons/v_knife_default_ct.mdl", "knife"}},
-		{WEAPON_KNIFE_T,{"models/weapons/v_knife_default_t.mdl", "knife_t"}},
-		{WEAPON_KNIFE_BAYONET, {"models/weapons/v_knife_bayonet.mdl", "bayonet"}},
-		{WEAPON_KNIFE_CSS,{"models/weapons/v_knife_css.mdl", "knife_css"}},
-
-		{WEAPON_KNIFE_SKELETON,{"models/weapons/v_knife_skeleton.mdl", "knife_skeleton"}},
-		{WEAPON_KNIFE_OUTDOOR,{"models/weapons/v_knife_outdoor.mdl", "knife_outdoor"}},
-		{WEAPON_KNIFE_CANIS,{"models/weapons/v_knife_canis.mdl", "knife_canis"}},
-		{WEAPON_KNIFE_CORD,{"models/weapons/v_knife_cord.mdl", "knife_cord"}},
-
-
-		{WEAPON_KNIFE_FLIP, {"models/weapons/v_knife_flip.mdl", "knife_flip"}},
-		{WEAPON_KNIFE_GUT, {"models/weapons/v_knife_gut.mdl", "knife_gut"}},
-		{WEAPON_KNIFE_KARAMBIT, {"models/weapons/v_knife_karam.mdl", "knife_karambit"}},
-		{WEAPON_KNIFE_M9_BAYONET, {"models/weapons/v_knife_m9_bay.mdl", "knife_m9_bayonet"}},
-		{WEAPON_KNIFE_TACTICAL, {"models/weapons/v_knife_tactical.mdl", "knife_tactical"}},
-		{WEAPON_KNIFE_FALCHION, {"models/weapons/v_knife_falchion_advanced.mdl", "knife_falchion"}},
-		{WEAPON_KNIFE_SURVIVAL_BOWIE, {"models/weapons/v_knife_survival_bowie.mdl", "knife_survival_bowie"}},
-		{WEAPON_KNIFE_BUTTERFLY, {"models/weapons/v_knife_butterfly.mdl", "knife_butterfly"}},
-		{WEAPON_KNIFE_PUSH, {"models/weapons/v_knife_push.mdl", "knife_push"}},
-		{WEAPON_KNIFE_URSUS,{"models/weapons/v_knife_ursus.mdl", "knife_ursus"}},
-		{WEAPON_KNIFE_GYPSY_JACKKNIFE,{"models/weapons/v_knife_gypsy_jackknife.mdl", "knife_gypsy_jackknife"}},
-		{WEAPON_KNIFE_STILETTO,{"models/weapons/v_knife_stiletto.mdl", "knife_stiletto"}},
-		{WEAPON_KNIFE_WIDOWMAKER,{"models/weapons/v_knife_widowmaker.mdl", "knife_widowmaker"}},
-	};
-
 	int random_sequence(const int low, const int high)
 	{
 		return rand() % (high - low + 1) + low;
@@ -368,16 +242,14 @@ namespace skins::knifes
 	{
 		const auto local = static_cast<C_BasePlayer*>(g_EntityList->GetClientEntity(g_EngineClient->GetLocalPlayer()));
 
-		if (!local)
-			return;
-
-		if (!local->IsAlive())
+		if (!local || !local->IsAlive())
 			return;
 
 		const auto owner = (C_BasePlayer*)g_EntityList->GetClientEntityFromHandle(entity->m_hOwner());
 
 		if (owner != local)
 			return;
+
 		if (entity && entity->m_hOwner() && entity->m_hOwner().IsValid()) {
 			const auto view_model_weapon_handle = entity->m_hWeapon();
 
@@ -388,14 +260,9 @@ namespace skins::knifes
 			if (!view_model_weapon)
 				return;
 			
-			if (k_weapon_info.count(view_model_weapon->m_Item().m_iItemDefinitionIndex()))
+			if (k_WeaponInfo.count(view_model_weapon->m_Item().m_iItemDefinitionIndex()))
 			{
-				int chosenknife = g_Configurations.misc_knifemodel - 1;
-
-				if (g_Configurations.misc_knifemodel == 0)
-					return;
-				
-				const auto override_model = knives[chosenknife].model_name;
+				const auto override_model = k_WeaponInfo.at(view_model_weapon->m_Item().m_iItemDefinitionIndex()).model;
 
 				auto& sequence = data->m_Value.m_Int;
 				sequence = GetNewAnimation(override_model, sequence);

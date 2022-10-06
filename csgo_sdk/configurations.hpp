@@ -66,6 +66,36 @@ struct Legitbot_Configurations
 	int min_damage = 1;
 };
 
+struct item_setting
+{
+	bool enableskinchanger = false;
+	char name[32] = "Default";
+	bool enabled = false;
+	int stickers_place = 0;
+	int definition_vector_index = 0;
+	int definition_index = 0;
+	bool   enabled_stickers = 0;
+	int paint_kit_vector_index = 0;
+	int paint_kit_index = 0;
+	int definition_override_vector_index = 0;
+	int definition_override_index = 0;
+	int seed = 0;
+	bool stat_trak = 0;
+	bool live_stat_trak = false;
+	//std::array<sticker_setting, 5> stickers;
+	float wear = FLT_MIN;
+	char custom_name[32];
+};
+
+struct statrack_setting
+{
+	int definition_index = 1;
+	struct
+	{
+		int counter = 0;
+	}statrack_new;
+};
+
 class Configurations
 {
 public:
@@ -174,6 +204,15 @@ public:
 		CONFIGURATION(bool, misc_fakebackwards, false);
 		CONFIGURATION(int, misc_fakebackwardskey, 0);
 		CONFIGURATION(int, misc_fakebackwardsturnsmoothness, 5);
+
+		//skins
+		CONFIGURATION(bool, skins_enabled, false);
+		CONFIGURATION(bool, skin_preview, false);
+		CONFIGURATION(bool, show_cur, true);
+		CONFIGURATION(bool, live_stat_trak, false);
+		std::map<int, item_setting> m_items = { };
+		std::map<int, statrack_setting> statrack_items = { };
+		std::map<std::string, std::string> m_IconOverrides;
 
 		// 
 		// COLORS

@@ -9,6 +9,7 @@
 #include "render/menu.hpp"
 #include "configurations.hpp"
 #include "render/render.hpp"
+#include "functions/kit_parser.hpp"
 
 #include "config.hpp"
 
@@ -40,6 +41,13 @@ DWORD WINAPI OnDllAttach(LPVOID base)
         InputSys::Get().RegisterHotkey(VK_INSERT, [base]() {
             Menu::Get().Toggle();
         });
+
+        Utils::ConsolePrint("Parsing skins.\n");
+
+        if (k_Skins.size() == 0)
+            InitializeKits();
+
+        Utils::ConsolePrint("Kits initialized\n");
 
         Utils::ConsolePrint("Finished.\n");
 		Utils::ConsolePrint("Built on: %s %s\n", __DATE__, __TIME__);

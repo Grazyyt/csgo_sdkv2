@@ -39,6 +39,7 @@
 #include "Interfaces/IInputSystem.hpp"
 #include "Interfaces/IRefCounted.hpp"
 #include "Interfaces/IGameRules.hpp"
+#include "interfaces/IBaseFileSystem.hpp"
 
 #include "Misc/Convar.hpp"
 #include "Misc/CUserCmd.hpp"
@@ -59,36 +60,37 @@ extern void(__cdecl* RandomSeed)(uint32_t seed);
 extern int(__cdecl* RandomInt)(int min, int max);
 extern float(__cdecl* RandomFloat)(float min, float max);
 
-inline IVEngineClient*       g_EngineClient   = nullptr;
-inline IBaseClientDLL*       g_CHLClient      = nullptr;
-inline IClientEntityList*    g_EntityList     = nullptr;
-inline CGlobalVarsBase*      g_GlobalVars     = nullptr;
-inline IEngineTrace*         g_EngineTrace    = nullptr;
-inline ICvar*                g_CVar           = nullptr;
-inline IPanel*               g_VGuiPanel      = nullptr;
-inline IClientMode*          g_ClientMode     = nullptr;
-inline IVDebugOverlay*       g_DebugOverlay   = nullptr;
-inline ISurface*             g_VGuiSurface    = nullptr;
-inline CInput*               g_Input          = nullptr;
-inline IVModelInfoClient*    g_MdlInfo        = nullptr;
-inline IVModelRender*        g_MdlRender      = nullptr;
-inline IVRenderView*         g_RenderView     = nullptr;
-inline IMaterialSystem*      g_MatSystem      = nullptr;
-inline IGameEventManager2*   g_GameEvents     = nullptr;
-inline IMoveHelper*          g_MoveHelper     = nullptr;
-inline IMDLCache*            g_MdlCache       = nullptr;
-inline IPrediction*          g_Prediction     = nullptr;
-inline CGameMovement*        g_GameMovement   = nullptr;
-inline IEngineSound*         g_EngineSound    = nullptr;
-inline CGlowObjectManager*   g_GlowObjManager = nullptr;
-inline IViewRender*          g_ViewRender     = nullptr;
-inline IDirect3DDevice9*     g_D3DDevice9     = nullptr;
-inline CClientState*         g_ClientState    = nullptr;
-inline IPhysicsSurfaceProps* g_PhysSurface    = nullptr;
-inline IInputSystem*         g_InputSystem    = nullptr;
-inline IWeaponSystem*        g_WeaponSystem   = nullptr;
-inline INetMessage*          g_NetMessage     = nullptr;
-inline CGameRules**          g_GameRules      = nullptr;
+inline IVEngineClient*       g_EngineClient     = nullptr;
+inline IBaseClientDLL*       g_CHLClient        = nullptr;
+inline IClientEntityList*    g_EntityList       = nullptr;
+inline CGlobalVarsBase*      g_GlobalVars       = nullptr;
+inline IEngineTrace*         g_EngineTrace      = nullptr;
+inline ICvar*                g_CVar             = nullptr;
+inline IPanel*               g_VGuiPanel        = nullptr;
+inline IClientMode*          g_ClientMode       = nullptr;
+inline IVDebugOverlay*       g_DebugOverlay     = nullptr;
+inline ISurface*             g_VGuiSurface      = nullptr;
+inline CInput*               g_Input            = nullptr;
+inline IVModelInfoClient*    g_MdlInfo          = nullptr;
+inline IVModelRender*        g_MdlRender        = nullptr;
+inline IVRenderView*         g_RenderView       = nullptr;
+inline IMaterialSystem*      g_MatSystem        = nullptr;
+inline IGameEventManager2*   g_GameEvents       = nullptr;
+inline IMoveHelper*          g_MoveHelper       = nullptr;
+inline IMDLCache*            g_MdlCache         = nullptr;
+inline IPrediction*          g_Prediction       = nullptr;
+inline CGameMovement*        g_GameMovement     = nullptr;
+inline IEngineSound*         g_EngineSound      = nullptr;
+inline CGlowObjectManager*   g_GlowObjManager   = nullptr;
+inline IViewRender*          g_ViewRender       = nullptr;
+inline IDirect3DDevice9*     g_D3DDevice9       = nullptr;
+inline CClientState*         g_ClientState      = nullptr;
+inline IPhysicsSurfaceProps* g_PhysSurface      = nullptr;
+inline IInputSystem*         g_InputSystem      = nullptr;
+inline IWeaponSystem*        g_WeaponSystem     = nullptr;
+inline INetMessage*          g_NetMessage       = nullptr;
+inline CGameRules**          g_GameRules        = nullptr;
+inline IBaseFileSystem*      g_BaseFileSystem   = nullptr;
 inline QAngle                tpangle;
 
 template<typename... Args>

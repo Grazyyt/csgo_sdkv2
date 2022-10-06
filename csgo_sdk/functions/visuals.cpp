@@ -595,9 +595,7 @@ void Visuals::RenderC4Window(C_BaseEntity* ent)
 			windowSizeY = 27;
 		}
 		else
-		{
 			windowSizeY = 17;
-		}
 	}
 
 	float box_w = (float)fabs(0 - windowSizeX);
@@ -609,12 +607,21 @@ void Visuals::RenderC4Window(C_BaseEntity* ent)
 	Render::Get().RenderText("o", ImVec2(x / 2, y / 2 - 415), 30, Color(255, 255, 255, 200), true, true, g_IconEsp);
 
 	C_BasePlayer* Defuser = (C_BasePlayer*)C_BasePlayer::get_entity_from_handle(ent->m_hBombDefuser());
+	bool localhasdefuser = g_LocalPlayer->m_bHasDefuser();
 
 	if (Defuser)
+	{
 		Render::Get().CircularProgressBar(x / 2, y / 2 - 400, 37, 40, 0, 360 * (DefuseTimeRemaining / (Defuser->m_bHasDefuser() ? 5 : 10)), yaint2, true);
+	}
 	else
+	{
 		Render::Get().CircularProgressBar(x / 2, y / 2 - 400, 37, 40, 0, 360 * (bombTimer / ent->m_flTimerLength()), yaint, true);
 
+		if (localhasdefuser && bombTimer > 5 || !localhasdefuser && bombTimer > 10)
+		Render::Get().RenderText("Can Defuse", x / 2, y / y + 100, 40, Color(50, 255, 50, 255));
+		else
+		Render::Get().RenderText("Can't Defuse", x / 2, y / y + 100, 40, Color(255, 50, 50, 255));
+	}
 }
 
 void Visuals::RenderItemEsp(C_BaseEntity* ent)

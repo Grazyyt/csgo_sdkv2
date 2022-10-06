@@ -104,8 +104,12 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="functions\glow.cpp" />
     <ClCompile Include="functions\grenade_pred.cpp" />
-    <ClCompile Include="functions\knifechanger.cpp" />
+    <ClCompile Include="functions\item_definitions.cpp" />
+    <ClCompile Include="functions\kit_parser.cpp" />
+    <ClCompile Include="functions\sequence.cpp" />
     <ClCompile Include="functions\misc.cpp" />
+    <ClCompile Include="functions\parser.cpp" />
+    <ClCompile Include="functions\skins.cpp" />
     <ClCompile Include="functions\visuals.cpp" />
     <ClCompile Include="helpers\events.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
@@ -114,6 +118,7 @@
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="render\directx render\dx_render.cpp" />
+    <ClCompile Include="render\ui.cpp" />
     <ClCompile Include="sdk\utils\input.cpp" />
     <ClCompile Include="sdk\utils\math.cpp" />
     <ClCompile Include="sdk\utils\utils.cpp" />
@@ -146,8 +151,12 @@
     <ClInclude Include="functions\autowall.hpp" />
     <ClInclude Include="functions\backtrack.hpp" />
     <ClInclude Include="functions\grenade_pred.hpp" />
-    <ClInclude Include="functions\knifechanger.hpp" />
+    <ClInclude Include="functions\item_definitions.hpp" />
+    <ClInclude Include="functions\kit_parser.hpp" />
+    <ClInclude Include="functions\sequence.hpp" />
     <ClInclude Include="functions\misc.hpp" />
+    <ClInclude Include="functions\parser.hpp" />
+    <ClInclude Include="functions\skins.hpp" />
     <ClInclude Include="helpers\eventlistener.h" />
     <ClInclude Include="helpers\events.hpp" />
     <ClInclude Include="helpers\fnv.hpp" />
@@ -163,6 +172,8 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="minhook\minhook.h" />
     <ClInclude Include="render\directx render\dx_render.hpp" />
+    <ClInclude Include="render\ui.hpp" />
+    <ClInclude Include="sdk\interfaces\IBaseFileSystem.hpp" />
     <ClInclude Include="sdk\interfaces\IGameRules.hpp" />
     <ClInclude Include="sdk\misc\datamap.hpp" />
     <ClInclude Include="fonts\droid.hpp" />

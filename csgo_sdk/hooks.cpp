@@ -14,10 +14,12 @@
 #include "functions/grenade_pred.hpp"
 #include "functions/aimbot.hpp"
 #include "functions/backtrack.hpp"
-#include "functions/knifechanger.hpp"
 #include "helpers/eventlistener.h"
 #include "minhook/minhook.h"
 #include "helpers/fnv.hpp"
+#include "functions/skins.hpp"
+#include "functions/sequence.hpp"
+#include "functions/item_definitions.hpp"
 
 #pragma intrinsic(_ReturnAddress)
 
@@ -326,10 +328,10 @@ namespace Hooks
 		static auto ofunc = hlclient_hook.get_original<void(__thiscall*)(IBaseClientDLL*, ClientFrameStage_t)>(index::FrameStageNotify);
 
 		if (stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START)
-		{
-			if (g_EngineClient->IsInGame() && g_EngineClient->IsConnected())
-				skins::knifes::UpdateKnife();
-		}
+			skins::onFrameStageNotify(false);
+
+		if (stage == FRAME_NET_UPDATE_END || g_Unload)
+			skins::onFrameStageNotify(true);
 
 		if (stage == FRAME_RENDER_START)
 		{
@@ -388,7 +390,7 @@ namespace Hooks
 	bool __fastcall hkSvCheatsGetBool(PVOID pConVar, void* edx)
 	{
 		static auto dwCAM_Think = Utils::PatternScan(GetModuleHandleW(L"client.dll"), "85 C0 75 30 38 86");
-		static auto ofunc = sv_cheats.get_original<bool(__thiscall *)(PVOID)>(13);
+		static auto ofunc = sv_cheats.get_original<bool(__thiscall *)(PVOID)>(index::SvCheatsGetBool);
 		if (!ofunc)
 			return false;
 
@@ -441,15 +443,36 @@ namespace Hooks
 
 		if (!strcmp(pEvent->GetName(), "player_death"))
 		{
-			//C_BasePlayer* hurt = (C_BasePlayer*)g_EntityList->GetClientEntity(g_EngineClient->GetPlayerForUserID(event->GetInt("userid")));
-			//C_BasePlayer* attacker = (C_BasePlayer*)g_EntityList->GetClientEntity(g_EngineClient->GetPlayerForUserID(event->GetInt("attacker")));
-			// (g_EngineClient->GetPlayerForUserID(event->GetInt("attacker")) == g_EngineClient->GetLocalPlayer() && g_EngineClient->GetPlayerForUserID(event->GetInt("userid")) != g_EngineClient->GetLocalPlayer())
-			auto attacker = (C_BasePlayer*)g_EntityList->GetClientEntity(g_EngineClient->GetPlayerForUserID(pEvent->GetInt("attacker")));
-			if (attacker && attacker->EntIndex() == g_EngineClient->GetLocalPlayer())
+			C_BasePlayer* hurt = (C_BasePlayer*)g_EntityList->GetClientEntity(g_EngineClient->GetPlayerForUserID(pEvent->GetInt("userid")));
+			C_BasePlayer* attacker = (C_BasePlayer*)g_EntityList->GetClientEntity(g_EngineClient->GetPlayerForUserID(pEvent->GetInt("attacker")));
+			if (g_EngineClient->GetPlayerForUserID(pEvent->GetInt("attacker")) == g_EngineClient->GetLocalPlayer() && g_EngineClient->GetPlayerForUserID(pEvent->GetInt("userid")) != g_EngineClient->GetLocalPlayer())
 			{
-				if (Events::Get().IsKnifeString(pEvent->GetString("weapon")) && g_Configurations.misc_knifemodel != 0)
+				/*auto& weapon = g_LocalPlayer->m_hActiveWeapon();
+				if (weapon)
 				{
-					pEvent->SetString("weapon", skins::knifes::UpdateKillIcons());
+
+					for (auto& val : k_WeaponNames)
+					{
+						auto& skin_data = g_Configurations.m_items[val.definition_index];
+						auto& stat_track = g_Configurations.statrack_items[val.definition_index];
+
+						if (skin_data.stat_trak && stat_track.statrack_new.counter > -1)
+						{
+
+							stat_track.statrack_new.counter++;
+							weapon->m_nFallbackStatTrak() = stat_track.statrack_new.counter;
+							weapon->GetClientNetworkable()->PostDataUpdate(0);
+							weapon->GetClientNetworkable()->OnDataChanged(0);
+						}
+					}
+					//auto& skin_data = g_Configurations.m_items[k_WeaponNames[definition_vector_index].definition_index];
+					//auto& stat_track = g_Configurations.statrack_items[k_WeaponNames[definition_vector_index].definition_index];
+				}*/
+
+				const auto icon_override = skins::GetIconOverride(pEvent->GetString("weapon"));
+				if (icon_override)
+				{
+					pEvent->SetString("weapon", icon_override);
 				}
 			}
 		}
@@ -463,7 +486,7 @@ namespace Hooks
 		const auto proxy_data = const_cast<CRecvProxyData*>(pData);
 		const auto view_model = static_cast<C_BaseViewModel*>(entity);
 
-		skins::knifes::DoSequenceRemapping(proxy_data, view_model);
+		Sequence::DoSequenceRemapping(proxy_data, view_model);
 		
 
 		original_fn(pData, entity, output);

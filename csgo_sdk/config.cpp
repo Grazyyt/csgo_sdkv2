@@ -2,6 +2,7 @@
 #include "configurations.hpp"
 
 #include "sdk/csgostructs.hpp"
+#include "functions/item_definitions.hpp"
 
 #include <fileapi.h>
 #include <WinBase.h>
@@ -50,7 +51,7 @@ void CConfig::SetupValue(int& value, int def, std::string category, std::string 
 	value = def; ints.push_back(new ConfigValue< int >(category, name, &value, def));
 }
 
-void CConfig::SetupValue(char* value, char* def, std::string category, std::string name) 
+void CConfig::SetupValue(char* value, char* def, std::string category, std::string name)
 {
 	value = def; chars.push_back(new ConfigValue< char >(category, name, value, *def));
 }
@@ -248,12 +249,32 @@ void CConfig::SetupColors()
 	SetupColor(g_Configurations.misc_changesmoke_color, "color_changesmoke");
 }
 
+void CConfig::SetupSkins()
+{
+	SetupValue(g_Configurations.show_cur, true, "general", "show_skins_for_selected_weapon");
+	SetupValue(g_Configurations.skin_preview, false, "general", "skin_preview");
+
+	for (auto& val : k_WeaponNames)
+	{
+		SetupValue(g_Configurations.m_items[val.definition_index].paint_kit_index, 0, (val.name), "paint_kit");
+		SetupValue(g_Configurations.m_items[val.definition_index].paint_kit_vector_index, 0, (val.name), "paint_kit_index");
+		SetupValue(g_Configurations.m_items[val.definition_index].definition_override_index, 0, (val.name), "selected_model_idx");
+		SetupValue(g_Configurations.m_items[val.definition_index].definition_override_vector_index, 0, (val.name), "selected_model");
+		SetupValue(g_Configurations.m_items[val.definition_index].stat_trak, false, (val.name), "stattrak_enabled");
+		SetupValue(g_Configurations.statrack_items[val.definition_index].statrack_new.counter, 0, (val.name), "stattrak_counter");
+		SetupValue(g_Configurations.m_items[val.definition_index].seed, 0, (val.name), "seed");
+		SetupValue(g_Configurations.m_items[val.definition_index].wear, 0, (val.name), "wear");
+		SetupValue(g_Configurations.m_items[val.definition_index].custom_name, "", (val.name), "custom_name");
+	}
+}
+
 void CConfig::Setup() 
 {
 	CreateDirectory("C:\\csgo_sdk\\", NULL);
 	CConfig::SetupLegit();
 	CConfig::SetupVisuals();
 	CConfig::SetupMisc();
+	CConfig::SetupSkins();
 	CConfig::SetupColors();
 }
 
